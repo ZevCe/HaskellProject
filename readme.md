@@ -1,0 +1,1 @@
+type cabal install into terminal to build/run project
