@@ -1,4 +1,5 @@
 import Character
+import Item
 
 main = let 
         p1 = Character (Stamina 100) (Ki 50) (Speed 20)
@@ -7,3 +8,4 @@ main = let
                 do
                     print p1
                     print p2
+                    print $ useHealthPotion p2
