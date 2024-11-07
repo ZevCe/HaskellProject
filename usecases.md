@@ -29,12 +29,16 @@ What we need to figure out before we can start programming
         * 25 = 1.6x multiplier to basic attack formula
         * 40 = 2x multiplier to basic attack formula
     * healing = undefined
-    * buff, your next attack will do 1.5x damage
-    * debuff, a selected enemy will take 1.5x damage
+    * invigorate:
+        * your next attack will do 1.5x damage (minor 15 resource)
+        * all allies next attack will do 1.5x damage (major 35 resource)
+        * does not stack
+    * demoralize
+        * a selected enemy will take 1.5x damage (minor 15 resource)
+        * all enemies will take 1.5x damage (major 35 resource)
+        * does not stack
     * shield, the enemy's next physical attack must target you or another shielding ally, will do .2x damage
     * barrier, the enemy's next magical attack must target you or another barriering ally, will do .2x damage
-    * 
-    * 
 3) Items
     * health potions, restores set amt of stamina
     * mana potion, restores set amt of ki
