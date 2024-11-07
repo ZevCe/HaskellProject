@@ -3,5 +3,5 @@ module Item
 
 import Character
 
-useHealthPotion (Character (Stamina sta) k sp) =
-    Character (Stamina (sta + 20)) k sp
+useHealthPotion (Character (Stamina sta) ki speed team) =
+    Character (Stamina (sta + 20)) ki speed team
