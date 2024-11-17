@@ -16,25 +16,71 @@ data ItemList =
 
 useHealthPotion :: Character -> ItemList -> (Character, ItemList)
 useHealthPotion target items =
-    if not (numHealthPotions items == 0)
-        then if stamina target + 20 > maxStamina target
-                then (modifyStamina target (maxStamina target - stamina target), usedItems)
-             else (modifyStamina target 20, usedItems)
+    if numHealthPotions items /= 0
+        then (modifyStamina target restoreAmt, usedItems)
     else (target, items)
     where
         usedItems =
             ItemList (numHealthPotions items - 1) (numManaPotions items)
             (numThrowingKnives items) (numMagicalSeals items)
             (numWebTraps items) (numHastePotions items)
+        
+        restoreAmt = min 20 $ maxStamina target - stamina target
 
+useManaPotion user target items = 
+    if numManaPotions items /= 0
+        then (modifyKi target restoreAmt, usedItems)
+    else (target, items)
+    where
+        usedItems =
+            ItemList (numHealthPotions items) (numManaPotions items - 1)
+            (numThrowingKnives items) (numMagicalSeals items)
+            (numWebTraps items) (numHastePotions items)
+        
+        restoreAmt = min 20 $ maxKi target - ki target
 
+useThrowingKnives target items = 
+    if numThrowingKnives items /= 0
+        then (modifyStamina target (-20), usedItems)
+    else (target, items)
+    where
+        usedItems =
+            ItemList (numHealthPotions items) (numManaPotions items)
+            (numThrowingKnives items - 1) (numMagicalSeals items)
+            (numWebTraps items) (numHastePotions items)
 
-useManaPotion user target items = undefined
+useMagicalSeal target items = 
+    if numThrowingKnives items /= 0
+        then (modifyKi target (-20), usedItems)
+    else (target, items)
+    where
+        usedItems =
+            ItemList (numHealthPotions items) (numManaPotions items)
+            (numThrowingKnives items) (numMagicalSeals items - 1)
+            (numWebTraps items) (numHastePotions items)
 
-useThrowingKnives user target items = undefined
+useWebTraps target items = 
+    if "webTrap" notElem (statuses target)
+        then (newTarget, usedItems)
+    else (target, items) 
+    where
+        usedItems =
+            ItemList (numHealthPotions items) (numManaPotions items)
+            (numThrowingKnives items) (numMagicalSeals items)
+            (numWebTraps items - 1) (numHastePotions items)
 
-useMagicalSeal user target items = undefined
+        slowedTarget = modifySpeed target -(speed target / 2)
+        newTarget = modifyStatuses target ("webTrap" : statuses target)
 
-useWebTraps user target items = undefined
+useHastePotion target items =
+    if "hastePotion" notElem (statuses target)
+        then (newTarget, usedItems)
+    else (target, items) 
+    where
+        usedItems =
+            ItemList (numHealthPotions items) (numManaPotions items)
+            (numThrowingKnives items) (numMagicalSeals items)
+            (numWebTraps items) (numHastePotions items - 1)
 
-useHastePotion user target items = undefined
+        hastedTarget = modifySpeed target (speed target)
+        newTarget = modifyStatuses target ("hastePotion" : statuses target)
