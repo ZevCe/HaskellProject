@@ -44,5 +44,5 @@ What we need to figure out before we can start programming
     * mana potion, restores set amt of ki
     * throwing knives, does set amt of stamina damage
     * magical seal, does set amt of ki damage
-    * web trap, halves an opponents speed
+    * web trap, halves an opponents speed for rest of battle
     * haste potion, doubles speed for rest of battle

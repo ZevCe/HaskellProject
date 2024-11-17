@@ -1,7 +1,6 @@
 module Test where
 
 import Character
-import ModifyStats
 import Actions
 import Item
 import Data.List (sortBy)

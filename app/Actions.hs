@@ -1,8 +1,8 @@
 module Actions where
 
 import Character
-import ModifyStats
 
+--refactor to use where instead of let in
 
 --main attack functions, will only get more complex as time goes on and we start
 --having to check for various status conditions before attacking as well
@@ -21,7 +21,8 @@ staminaSingleAttack user target level =
     in (newUser, newTarget)
 
 --valid levels are 0-3
-kiSingleAttack user target level = 
+kiSingleAttack :: Character -> Character -> Int -> (Character, Character)
+kiSingleAttack user target level =
     let
         atk = maxKi user
         def = maxKi target
@@ -32,20 +33,22 @@ kiSingleAttack user target level =
     in (newUser, newTarget)
 
 --valid levels are 1-2
-staminaGroupAttack :: Character -> [Character] -> Int -> (Character, [Character])    
-staminaGroupAttack user targets level = 
+staminaGroupAttack :: Character -> [Character] -> Int -> (Character, [Character])
+staminaGroupAttack user targets level =
     let
-        newUser = modifyStamina user (-30 * level)
+        newUser = modifyStamina user (- (30 * level))
         newTargets = [snd $ staminaSingleAttack user currentTarget (level - 1) | currentTarget <- targets ]
     in (newUser, newTargets)
 
 --valid levels are 1-2
+kiGroupAttack :: Character -> [Character] -> Int -> (Character, [Character])
 kiGroupAttack user targets level =
     let
-        newUser = modifyKi user (-30 * level)
+        newUser = modifyKi user (- (30 * level))
         newTargets = [snd $ kiSingleAttack user currentTarget (level - 1) | currentTarget <- targets ]
     in (newUser, newTargets)
 
+--valid levels are 1-3
 healingSingle :: Character -> Character -> Int -> (Character, Character)
 healingSingle user target level =
     let
@@ -53,12 +56,30 @@ healingSingle user target level =
         newTarget = modifyStamina target ( (-5) + 15 * level)
     in (newUser, newTarget)
 
-healingGroup user targets level = undefined
+--valid levels are 1-2
+healingGroup :: Character -> [Character] -> Int -> (Character, [Character])
+healingGroup user targets level =
+    let
+        newUser = modifyKi user (- (30 * level))
+        newTargets = [snd $ healingSingle user currentTarget level | currentTarget <- targets]
+    in (newUser, newTargets)
 
+--doubles damage of next attack from target
 invigorateTarget user target = undefined
 
 invigorateGroup user targets = undefined
 
+--causes target to take double damage on next incoming attack
 demoralizeTarget user target = undefined
 
 demoralizeGroup user targets = undefined
+
+--reduces damage taken from next stamina attack
+shield user target level = undefined
+
+shieldGroup user target level = undefined
+
+--reduces damage taken from next ki attack
+barrier user target level = undefined
+
+barrier user target level = undefined
