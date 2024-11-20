@@ -79,8 +79,8 @@ kiGroupAttack user targets level =
         newTargets = [snd $ kiSingleAttack user currentTarget (level - 1) | currentTarget <- targets ]
 
 --valid levels are 1-3
-healingSingle :: Character -> Character -> Int -> (Character, Character)
-healingSingle user target level =
+healSingle :: Character -> Character -> Int -> (Character, Character)
+healSingle user target level =
     if ki newUser >= 0
         then (newUser, newTarget)
     else (user, target)
@@ -90,14 +90,14 @@ healingSingle user target level =
         newTarget = modifyStamina target amtHealed
 
 --valid levels are 1-2
-healingGroup :: Character -> [Character] -> Int -> (Character, [Character])
-healingGroup user targets level =
+healGroup :: Character -> [Character] -> Int -> (Character, [Character])
+healGroup user targets level =
     if ki newUser >= 0
         then (newUser, newTargets)
     else (user, targets)
     where
         newUser = modifyKi user (- (30 * level))
-        newTargets = [snd $ healingSingle user currentTarget level | currentTarget <- targets]
+        newTargets = [snd $ healSingle user currentTarget level | currentTarget <- targets]
 
 --valid levels are 1-3
 rallySingle :: Character -> Character -> Int -> (Character, Character)

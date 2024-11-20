@@ -2,11 +2,11 @@
 module Main where
 import Character
 import Item
+import Actions
 import Data.List
-import Control.Concurrent
 import Data.Maybe
-import Web.Scotty
-
+import Control.Concurrent
+import Text.Read (readMaybe)
 
 {-
 import Web.Scotty
@@ -38,13 +38,28 @@ data Class =
         barrier      :: Bool}
 
 instance Eq Class where
-    c1 == c2 = character c1 == character c2
+    c1 == c2 = name c1 == name c2
 
 instance Ord Class where
     compare c1 c2 = compare (character c1) (character c2)
 
 instance Show Class where
     show c = name c ++ "\n" ++ show (character c)
+
+--functions for changing the character or items of a class
+updateCharacter :: Class -> Character -> Class
+updateCharacter char newChar =
+     Class newChar (items char) (name char) (team char)
+    (stamAttack char) (kiAttack char) (heal char) (rally char)
+    (invigorate char) (demoralize char) (intimidate char) (shield char)
+    (amplify char) (dampen char) (curse char) (barrier char)
+
+updateItems :: Class -> ItemList -> Class
+updateItems char newItems =
+    Class (character char) newItems (name char) (team char)
+    (stamAttack char) (kiAttack char) (heal char) (rally char)
+    (invigorate char) (demoralize char) (intimidate char) (shield char)
+    (amplify char) (dampen char) (curse char) (barrier char)
 
 
 --creates the classes and starts the main game loop
@@ -81,7 +96,7 @@ gameLoop (turnChar:chars) = do
     if team turnChar == "Friend"
         then do
             printActions turnChar
-            results <- parseInput (turnChar:chars)
+            results <- processInput (turnChar:chars)
             gameLoop (chars ++ [turnChar])
     else do
         putStrLn (name turnChar ++ " attacks")
@@ -158,115 +173,208 @@ friendTeam :: [Class] -> [Class]
 friendTeam chars = filter (\c -> team c == "Friend") chars
 
 
---helper function which repeatedly calls performAction until a valid input is given
-parseInput :: [Class] -> IO (Class, [Class])
-parseInput (user:chars) = do
+--helper function for gameloop which repeatedly calls performAction until a valid input is given
+--unwraps the list of all updated characters from perform action and will print out if any characters died
+processInput :: [Class] -> IO [Class]
+processInput chars@(user:_) = do
     action <- getLine
-    let result = performAction (words action) (user:chars)
-    maybe ( do
+    let result = performAction (words action) chars
+    maybe (do
             putStrLn "Unrecognized Command"
-            parseInput (user:chars)
-            )
+            processInput (user:chars))
             return result
 
-parseInput _ = undefined
+processInput _ = undefined
+
+--let deadChars = oldChars \\ newChars
+
+--helper function for printing out which characters died
+printDeadChars :: [Class] -> IO ()
+printDeadChars chars = putStrLn "Dead lol"
+        
 
 
---need to check if char has given item/skill before using, otherwise return nothing
---need to check if skill level range if valid, if not return nothing
---if character does not have enough Ki/Stamina to perform action will still take up
---turn, but need to find way to notify user
-
-performAction :: [String] -> [Class] -> Maybe (Class, [Class])
+--takes a string, attempts to parse it, checks that formatting is valid and that the given character can in fact perform the action
+--then returns an updated list of all characters
+performAction :: [String] -> [Class] -> Maybe [Class]
 
 --use health potion
-performAction ("HeP":target) (user:chars) = undefined
+performAction ("HeP":targetName:_) chars = useItem targetName chars numHealthPotions useHealthPotion
 
 --use mana potion
-performAction ("MP":target) (user:chars) = undefined
+performAction ("MP":targetName:_) chars = useItem targetName chars numManaPotions useManaPotion
 
 --use throwing knives
-performAction ("TK":target) (user:chars) = undefined
+performAction ("TK":targetName:_) chars = useItem targetName chars numThrowingKnives useThrowingKnives
 
 --use magial seal
-performAction ("MS":target) (user:chars) = undefined
+performAction ("MS":targetName:_) chars = useItem targetName chars numMagicalSeals useMagicalSeal
 
 --use web trap
-performAction ("WT":target) (user:chars) = undefined
+performAction ("WT":targetName:_) chars = useItem targetName chars numWebTraps useWebTraps
 
 --use haste potion
-performAction ("HaP":target) (user:chars) = undefined
+performAction ("HaP":targetName:_) chars = useItem targetName chars numHastePotions useHastePotion
 
 --use stamina attack
-performAction ("SA":level:target) (user:chars) = undefined
+performAction ("SA":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [0,1,2,3] stamAttack staminaSingleAttack
 
 --use group stamina attack
-performAction ("SAA":level:target) (user:chars) = undefined
+--performAction ("SAA":level:_) chars = performGroupLevelAction level chars [1,2] enemyTeam stamAttack staminaGroupAttack
 
 --use ki attack
-performAction ("KA":level:target) (user:chars) = undefined
+performAction ("KA":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [0,1,2,3] kiAttack kiSingleAttack
 
 --use group ki attack
-performAction ("KAA":level:target) (user:chars) = undefined
+--performAction ("KAA":level:_) chars = performGroupLevelAction level chars [1,2] enemyTeam kiAttack kiGroupAttack
 
 --use heal
-performAction ("Hl":level:target) (user:chars) = undefined
+performAction ("Hl":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [1,2,3] heal healSingle
 
 --use group heal
-performAction ("HlA":level) (user:chars) = undefined
+--performAction ("HlA":level:_) chars = performGroupLevelAction level chars [1,2] friendTeam heal healGroup
 
 --use rally
-performAction ("Rly":level:target) (user:chars) = undefined
+performAction ("Rly":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [1,2,3] rally rallySingle
 
 --use group rally
-performAction ("RlyA":level) (user:chars) = undefined
+--performAction ("RlyA":level:_) chars = performGroupLevelAction level chars [1,2] friendTeam rally rallyGroup
 
 --use invigorate
-performAction ("Invig":target) (user:chars) = undefined
+performAction ("Invig":targetName:_) chars = performStatusSingle targetName chars invigorate invigorateSingle
 
 --use group invigorate
-performAction ("InvigA":_) (user:chars) = undefined
+--performAction ("InvigA":_) (user:chars) = undefined
 
 --use demoralize
-performAction ("Demor":target) (user:chars) = undefined
+performAction ("Demor":targetName:_) chars = performStatusSingle targetName chars demoralize demoralizeSingle
 
 --use group demoralize
-performAction ("DemorA":_) (user:chars) = undefined
+--performAction ("DemorA":_) (user:chars) = undefined
 
 --use intimidate
-performAction ("Intim":target) (user:chars) = undefined
+performAction ("Intim":targetName:_) chars = performStatusSingle targetName chars intimidate intimidateSingle
 
 --use group intimidate
-performAction ("IntimA":_) (user:chars) = undefined
+--performAction ("IntimA":_) (user:chars) = undefined
 
 --use shield
-performAction ("Shld":target) (user:chars) = undefined
+performAction ("Shld":targetName:_) chars = performStatusSingle targetName chars shield shieldSingle
 
 --use group shield 
-performAction ("ShldA":_) (user:chars) = undefined
+--performAction ("ShldA":_) (user:chars) = undefined
 
 --use amplify
-performAction ("Amp":target) (user:chars) = undefined
+performAction ("Amp":targetName:_) chars = performStatusSingle targetName chars amplify amplifySingle
 
 --use group amplify 
-performAction ("AmpA":_) (user:chars) = undefined
+--performAction ("AmpA":_) (user:chars) = undefined
 
 --use dampen
-performAction ("Damp":target) (user:chars) = undefined
+performAction ("Damp":targetName:_) chars = performStatusSingle targetName chars dampen dampenSingle
 
 --use group dampen
-performAction ("DampA":_) (user:chars) = undefined
+--performAction ("DampA":_) (user:chars) = undefined
 
 --use curse
-performAction ("Crs":target) (user:chars) = undefined
+performAction ("Crs":targetName:_) chars = performStatusSingle targetName chars curse curseSingle
 
 --use group curse
-performAction ("CrsA":_) (user:chars) = undefined
+--performAction ("CrsA":_) (user:chars) = undefined
 
 --use barrier
-performAction ("Brr":target) (user:chars) = undefined
+performAction ("Brr":targetName:_) chars = performStatusSingle targetName chars barrier barrierSingle
 
 --use group barrier
-performAction ("BrrA":target) (user:chars) = undefined
+--performAction ("BrrA":_) (user:chars) = undefined
 
-performAction  _ chars = Nothing
+performAction _ _ = Nothing
+
+--helper function for finding a target amongst a list of Classes
+getTarget :: [Class] -> String -> Maybe Class
+getTarget chars targetName =
+    if length target == 1 then Just $ head target
+    else Nothing
+    where
+        target = filter (\c -> name c == targetName) chars
+
+--helper function for replacing all the old characters in the turn list
+--then re-organizing them into turn order
+--need to add checks to filter out dead chars
+replaceOldChars :: [Class] -> [Class] -> [Class]
+replaceOldChars oldList updatedChars = reverse $ sort (updatedChars ++ unaffectedChars)
+    where
+        unaffectedChars = oldList \\ updatedChars
+
+--generic function for using an item
+useItem :: String -> [Class] -> (ItemList -> Int) -> (Character -> ItemList -> (Character, ItemList)) -> Maybe [Class]
+useItem targetName chars@(user:_) numItem itemOp =
+    if isNothing target || numItem (items justTarget) == 0 then Nothing
+    else Just returnList
+    where
+        target = getTarget chars targetName
+        justTarget = fromJust target
+        outcome = itemOp (character justTarget) (items user)
+        returnList =
+            if targetName == name user
+                then [updateItems (updateCharacter user (fst outcome)) (snd outcome)]
+            else [updateItems user (snd outcome), updateCharacter justTarget (fst outcome)]
+
+useItem _ _ _ _ = undefined
+
+--generic function for using single target actions which take a level
+performSingleLevelAction :: [String] -> [Class] ->  [Int] -> (Class -> Bool) -> (Character -> Character -> Int -> (Character, Character)) -> Maybe [Class]
+performSingleLevelAction (level:targetName:_) chars@(user:_) validLevels hasAction action =
+    if isNothing target || isNothing levelMaybe || fromJust levelMaybe `notElem` validLevels || not (hasAction user)
+        then Nothing
+    else Just returnList
+    where
+        target = getTarget chars targetName
+        justTarget = fromJust target
+        levelMaybe = readMaybe level :: Maybe Int
+        outcome = action (character user) (character justTarget) (fromJust levelMaybe)
+        returnList =
+            if targetName == name user
+                then [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
+            else [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
+
+performSingleLevelAction _ _ _ _ _ = undefined
+
+--generic function for using group actions which take a level
+--need to refactor character to also have name so we can match character to class
+{-
+performGroupLevelAction :: String -> [Class] -> [Int] -> ([Class] -> [Class]) -> 
+    (Class -> Bool) -> (Character -> [Character] -> Int -> (Character, [Character])) -> Maybe [Class]
+
+performGroupLevelAction level chars@(user:_) validLevels filterTeam hasAction action = 
+    if isNothing levelMaybe || fromJust levelMaybe `notElem` validLevels || not (hasAction user) then Nothing
+    else Just returnList
+    where
+        levelMaybe = readMaybe level :: Maybe Int
+        targetChars = [character curChar | curChar <- filterTeam chars]
+        outcome = action (character user) targetChars (fromJust levelMaybe)
+        --if this doesnt work how I want it to may have to rethink large parts of program or cut group attacks for the time being
+        updatedTargets = [updateCharacter curClass curChar | curClass <- filterTeam chars, curChar <- snd outcome]
+        returnList = 
+            if user `elem` updatedTargets 
+                then undefined
+            else updateCharacter user (fst outcome) : updatedTargets
+
+performGroupLevelAction _ _ _ _ _ _ = undefined
+-}
+
+--generic function for using a single target status move
+performStatusSingle :: String -> [Class] -> (Class -> Bool) -> (Character -> Character -> (Character, Character)) -> Maybe [Class]
+performStatusSingle targetName chars@(user:_) hasAction action = 
+    if isNothing target || not (hasAction user) then Nothing
+    else Just returnList
+    where
+        target = getTarget chars targetName
+        justTarget = fromJust target
+        outcome = action (character user) (character justTarget)
+        returnList =
+            if targetName == name user
+                then [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
+            else [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
+
+performStatusSingle _ _ _ _ = undefined
