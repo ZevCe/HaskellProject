@@ -96,37 +96,44 @@ printField (curChar : chars) = do
 
 printActions :: Class -> IO()
 printActions char = do
+    putStrLn "Tutorial:"
+    putStrLn "Below are all the possible actions the current turn character can perform"
+    putStrLn "The command line entry to perform any given action will be to the left of each action in parentheses"
+    putStrLn "<target> should be replaced with the name of a character the action should be"
+    putStrLn "performed on, actions which target all, will only target the relevant characters"
+    putStrLn "i.e. Stamina Attack All will only stamina attack enemie and not friendlies"
+    putStrLn "<1|2|3> indicates an action has multiple levels it can be performed at"
+    putStrLn "and what those levels are. Higher level actions will require more Ki/Stamina"
+    putStrLn "if a character does not have enough ki/stamina to perform a given action"
+    putStrLn "their turn will be spent without performing an action\n"
+
     --printing items
-    putStrLn "Items: "
-    putStr "Health Potions: "
-    print (numHealthPotions itemList)
-    putStr "Mana Potions: "
-    print (numManaPotions itemList)
-    putStr "Throwing Knives: "
-    print (numThrowingKnives itemList)
-    putStr "Magical Seals: "
-    print (numMagicalSeals itemList)
-    putStr "Web Traps: "
-    print (numWebTraps itemList)
-    putStr "Haste Potions: "
-    print (numHastePotions itemList)
+    putStrLn "Items:"
+    displayItem (numHealthPotions itemList) "(HeP <target>) Health Potions: "
+    displayItem (numManaPotions itemList) "(MP <target>) Mana Potions: "
+    displayItem (numThrowingKnives itemList) "(TK <target>) Throwing Knives: "
+    displayItem (numMagicalSeals itemList) "(MS <target>) Magical Seals: "
+    displayItem (numWebTraps itemList) "(WT <target>) Web Traps: "
+    displayItem (numHastePotions itemList) "(Hap <target>) Haste Potions: "
 
     --printing actions
-    putStrLn "\nActions: "
-    displayAction (stamAttack char) "canStamAttack"
-    displayAction (kiAttack char) "canKiAttack"
-    displayAction (heal char) "canHeal"
-    displayAction (rally char) "canRally"
-    displayAction (invigorate char) "canInvigorate"
-    displayAction (demoralize char) "canDemoralize"
-    displayAction (intimidate char) "canIntimidate"
-    displayAction (shield char) "canShield"
-    displayAction (amplify char) "canAmplify"
-    displayAction (dampen char) "canDampen"
-    displayAction (curse char) "canCurse"
-    displayAction (barrier char) "canBarrier"
+    putStrLn "\nActions:"
+    displayAction (stamAttack char) "(SA <0|1|2|3> <target>) Stamina Attack Single\n(SAA <1|2>) Stamina Attack All"
+    displayAction (kiAttack char) "(KA <0|1|2|3> <target>) Ki Attack Single\n(KAA <1|2>) Ki Attack All"
+    displayAction (heal char) "(Hl <1|2|3> <target>) Heal Single\n(HlA <1|2>) Heal All"
+    displayAction (rally char) "(Rly <1|2|3> <target>) Rally Single\n(RlyA <1|2>) Rally All"
+    displayAction (invigorate char) "(Invig <target>) Invigorate Single\n(InvigA) Invigorate All"
+    displayAction (demoralize char) "(Demor <target>) Demoralize Single\n(DemorA) Demoralize All"
+    displayAction (intimidate char) "(Intim <target>) Intimidate Single\n(IntimA) Intimidate All"
+    displayAction (shield char) "(Shld <target>) Shield Single\n(ShldA) Shield All"
+    displayAction (amplify char) "(Amp <target>) Amplify Single\n(AmpA) Amplify All"
+    displayAction (dampen char) "(Damp <target>) Dampen Single\n(DampA) Dampen All"
+    displayAction (curse char) "(Crs <target>) Curse Single\n(CrsA) Curse All"
+    displayAction (barrier char) "(Brr <target>) Barrier Single\n(BrrA) Barrier All"
     where
         itemList = items char
+        displayItem :: Int -> String -> IO()
+        displayItem i str = if i > 0 then putStrLn (str ++ show i) else putStr ""
         displayAction b str = if b then putStrLn str else putStr ""
 
 --checking if either team has won the battle
@@ -158,7 +165,7 @@ parseInput (user:chars) = do
     maybe ( do
             putStrLn "Unrecognized Command"
             parseInput (user:chars)
-            ) 
+            )
             return result
 
 parseInput _ = undefined
@@ -204,8 +211,14 @@ performAction ("KAA":level:target) (user:chars) = undefined
 --use heal
 performAction ("Hl":level:target) (user:chars) = undefined
 
+--use group heal
+performAction ("HlA":level) (user:chars) = undefined
+
 --use rally
 performAction ("Rly":level:target) (user:chars) = undefined
+
+--use group rally
+performAction ("RlyA":level) (user:chars) = undefined
 
 --use invigorate
 performAction ("Invig":target) (user:chars) = undefined
