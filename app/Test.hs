@@ -60,6 +60,24 @@ testManaPotion = TestCase $ do
     assertEqual "Full Mana Potion Test" p1 p2
     assertEqual "Overflow Mana Potion Test" p3 p4
 
+testHastePotion :: Test
+testHastePotion = TestCase $ do
+    let p1 = Character 100 100 30 50 20 []
+        p2 = Character 100 100 30 50 20 ["hastePotion"]
+        items = ItemList 2 2 2 2 2 2
+    print $ useHastePotion p1 items
+
+    assertEqual "Haste Potion Test" p1 p2
+
+testWebTrap :: Test
+testWebTrap = TestCase $ do
+    let p1 = Character 100 100 30 50 20 []
+        p2 = Character 100 100 30 50 20 ["webTrap"]
+        items = ItemList 2 2 2 2 2 2
+    print $ useWebTraps p1 items
+
+    assertEqual "Web Trap Test" p1 p2
+
 testThrowingKnives :: Test
 testThrowingKnives = TestCase $ do
     let p1 = Character 80 100 50 50 20 []
@@ -67,6 +85,7 @@ testThrowingKnives = TestCase $ do
         items = ItemList 2 2 2 2 2 2
     print $ useThrowingKnives p2 items
 
-    assertEqual "Throwing Knives Test" p1 
+    assertEqual "Throwing Knives Test" p1 p2
     
+testItems = TestList [TestLabel "testHealthPotion" testHealthPotion, TestLabel "testManaPotion" testManaPotion, TestLabel "testHastePotion" testHastePotion, TestLabel "testWebTrap" testWebTrap, TestLabel "testThrowingKnives" testThrowingKnives]
 
