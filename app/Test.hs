@@ -67,5 +67,6 @@ testThrowingKnives = TestCase $ do
         items = ItemList 2 2 2 2 2 2
     print $ useThrowingKnives p2 items
 
-    assertEqual "Full Mana Potion Test" p1 p2
+    assertEqual "Throwing Knives Test" p1 
+    
 
