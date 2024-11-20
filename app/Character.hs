@@ -1,13 +1,15 @@
 module Character where
 
-data Character  = 
-    Character { stamina    :: Int, 
+import Data.List (sortBy)
+import Data.Ord (comparing)
+
+data Character  =
+    Character { stamina    :: Int,
                 maxStamina :: Int,
                 ki         :: Int,
                 maxKi      :: Int,
                 speed      :: Int,
-                statuses   :: [String],
-                team       :: String }
+                statuses   :: [String]}
 
 
 instance Eq Character where
@@ -18,27 +20,32 @@ instance Ord Character where
 
 instance Show Character where
     show c =
-        "Character = " ++ "Stamina: " ++ show (stamina c) ++ "/" ++ show (maxStamina c) ++ 
-        " Ki: " ++ show (ki c) ++ "/" ++ show (maxKi c) ++ 
-        " Speed: " ++ show (speed c) ++ " Statuses: " ++ show (statuses c) ++ 
-        " Team: " ++ show (team c)
+        "Stamina: " ++ show (stamina c) ++ "/" ++ show (maxStamina c) ++
+        "\nKi: " ++ show (ki c) ++ "/" ++ show (maxKi c) ++
+        "\nSpeed: " ++ show (speed c) ++
+        "\nStatuses: " ++ show (statuses c)
 
-makeCharacter :: Int -> Int -> Int -> String -> Character
-makeCharacter sta k spd t = 
-    Character sta sta k k spd [] t
+-- Param: characters - List of all characters in a battle
+-- Returns: The list of characters sorted by speed (descending)
+getTurnOrder :: [Character] -> [Character]
+getTurnOrder = sortBy (flip (comparing speed))
+
+makeCharacter :: Int -> Int -> Int -> Character
+makeCharacter sta k spd =
+    Character sta sta k k spd []
 
 modifyStamina :: Character -> Int -> Character
-modifyStamina char amt = 
-    Character (stamina char + amt) (maxStamina char) (ki char) (maxKi char) (speed char) (statuses char) (team char)
+modifyStamina char amt =
+    Character (stamina char + amt) (maxStamina char) (ki char) (maxKi char) (speed char) (statuses char)
 
 modifyKi :: Character -> Int -> Character
-modifyKi char amt =  
-    Character (stamina char) (maxStamina char) (ki char + amt) (maxKi char) (speed char) (statuses char) (team char)
+modifyKi char amt =
+    Character (stamina char) (maxStamina char) (ki char + amt) (maxKi char) (speed char) (statuses char)
 
 modifySpeed :: Character -> Int -> Character
-modifySpeed char amt = 
-    Character (stamina char) (maxStamina char) (ki char) (maxKi char) (speed char + amt) (statuses char) (team char)
+modifySpeed char amt =
+    Character (stamina char) (maxStamina char) (ki char) (maxKi char) (speed char + amt) (statuses char)
 
 modifyStatuses :: Character -> [String] -> Character
-modifyStatuses char newStatuses = 
-    Character (stamina char) (maxStamina char) (ki char) (maxKi char) (speed char) (newStatuses) (team char)
+modifyStatuses char newStatuses =
+    Character (stamina char) (maxStamina char) (ki char) (maxKi char) (speed char) newStatuses

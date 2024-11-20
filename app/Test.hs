@@ -3,18 +3,16 @@ module Test where
 import Character
 import Actions
 import Item
-import Data.List (sortBy)
-import Data.Ord (comparing)
 import Test.HUnit
 
 
 testActions :: Test
 testActions = TestCase $ do
-        let p1 = makeCharacter 100 50 20 "Enemy"
-            p2 = makeCharacter 80 50 40 "Friend"
-            p3 = makeCharacter 90 70 20 "Friend"
-            p4 = makeCharacter 85 65 30 "Friend"
-            p5 = makeCharacter 50 95 70 "Friend"
+        let p1 = makeCharacter 100 50 20
+            p2 = makeCharacter 80 50 40 
+            p3 = makeCharacter 90 70 20 
+            p4 = makeCharacter 85 65 30 
+            p5 = makeCharacter 50 95 70 
 
         print p1
         print p2
@@ -39,15 +37,9 @@ testActions = TestCase $ do
 
 testItems :: Test
 testItems = TestCase $ do
-    let p1 = Character 80 100 50 50 20 [] "Friend"
-        p2 = makeCharacter 100 50 20 "Friend"
+    let p1 = Character 80 100 50 50 20 []
+        p2 = makeCharacter 100 50 20
         items = ItemList 1 1 1 1 1 1
     print $ useHealthPotion p1 items
     assertEqual "Health Potion Test" p1 p2
 
--- Param: characters - List of all characters in a battle
--- Returns: The list of characters sorted by speed (descending)
--- Bugs: Doesn't take into consideration team, but if we pass in enemy before
---  friendly, we shouldn't need to do that (more comprehensive testing) needed.
-getTurnOrder :: [Character] -> [Character]
-getTurnOrder = sortBy (flip (comparing speed))
