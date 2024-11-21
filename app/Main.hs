@@ -20,22 +20,6 @@ main = scotty 3000 $
         html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
 -}
 
---functions for changing the character or items of a class
-updateCharacter :: Class -> Character -> Class
-updateCharacter char newChar =
-     Class newChar (items char) (name char) (team char)
-    (stamAttack char) (kiAttack char) (heal char) (rally char)
-    (invigorate char) (demoralize char) (intimidate char) (shield char)
-    (amplify char) (dampen char) (curse char) (barrier char)
-
-updateItems :: Class -> ItemList -> Class
-updateItems char newItems =
-    Class (character char) newItems (name char) (team char)
-    (stamAttack char) (kiAttack char) (heal char) (rally char)
-    (invigorate char) (demoralize char) (intimidate char) (shield char)
-    (amplify char) (dampen char) (curse char) (barrier char)
-
-
 --creates the classes and starts the main game loop
 main :: IO ()
 main = do
@@ -47,22 +31,27 @@ main = do
 --top level function responsible for keeping track of current turn 
 --and handling input parsing
 gameLoop :: [Class] -> IO ()
-gameLoop [] = putStrLn "critical error"
+gameLoop [] = putStrLn "\nNeither team has any characters still capable of fighting, you have both lost today"
 gameLoop (turnChar:chars) = do
     putStrLn ("Start of " ++ name turnChar ++ "'s turn")
     threadDelay 500000
-    putStrLn "Friends' Stats:"
-    printField (friendTeam (turnChar:chars))
-    putStrLn "Enemies' Stats:"
-    printField (enemyTeam (turnChar:chars))
-    threadDelay 500000
     if team turnChar == "Friend"
         then do
+            putStrLn "Friends' Stats:"
+            printField (friendTeam (turnChar:chars))
+            threadDelay 500000
+            putStrLn "Enemies' Stats:"
+            printField (enemyTeam (turnChar:chars))
+            threadDelay 500000
             printActions turnChar
             results <- processInput (turnChar:chars)
-            gameLoop (chars ++ [turnChar])
+            battleState <- checkForEndOfBattle results
+            if battleState == "f" then putStrLn "\nA winner is you!"
+            else if battleState == "e" then putStrLn "\nA loser is you!"
+            else gameLoop results
     else do
-        putStrLn (name turnChar ++ " attacks")
+        putStrLn (name turnChar ++ " attacks\n")
+        threadDelay 500000
         gameLoop (chars ++ [turnChar])
 
 --displays state of all characters currently
@@ -86,6 +75,8 @@ printActions char = do
     putStrLn "if a character does not have enough ki/stamina to perform a given action"
     putStrLn "their turn will be spent without performing an action\n"
 
+    threadDelay 500000
+
     --printing items
     putStrLn "Items:"
     displayItem (numHealthPotions itemList) "(HeP <target>) Health Potions: "
@@ -94,6 +85,8 @@ printActions char = do
     displayItem (numMagicalSeals itemList) "(MS <target>) Magical Seals: "
     displayItem (numWebTraps itemList) "(WT <target>) Web Traps: "
     displayItem (numHastePotions itemList) "(Hap <target>) Haste Potions: "
+
+    threadDelay 500000
 
     --printing actions
     putStrLn "\nActions:"
@@ -111,7 +104,6 @@ printActions char = do
     displayAction (barrier char) "(Brr <target>) Barrier Single\n(BrrA) Barrier All"
     where
         itemList = items char
-        displayItem :: Int -> String -> IO()
         displayItem i str = if i > 0 then putStrLn (str ++ show i) else putStr ""
         displayAction b str = if b then putStrLn str else putStr ""
 
@@ -142,19 +134,37 @@ processInput :: [Class] -> IO [Class]
 processInput chars@(user:_) = do
     action <- getLine
     let result = performAction (words action) chars
-    maybe (do
+    if isNothing result
+        then do
             putStrLn "Unrecognized Command"
-            processInput (user:chars))
-            return result
+            processInput chars
+    else do
+        let justResult = fromJust result
+        printDeadChars $ chars \\ justResult
+        putStrLn "Returned results: "
+        print justResult
+        if user `notElem` justResult then do
+            putStrLn "Turn Character has died, turn order will be reset"
+            return justResult
+        else return $ fixTurnOrder user justResult
 
 processInput _ = undefined
 
---let deadChars = oldChars \\ newChars
-
 --helper function for printing out which characters died
 printDeadChars :: [Class] -> IO ()
-printDeadChars chars = putStrLn "Dead lol"
-        
+printDeadChars [] = putStr ""
+printDeadChars (char:chars) = do
+    putStrLn (name char ++ " has perished\n")
+    threadDelay 500000
+    printDeadChars chars
+
+--after we re-organize everyone by speed we need to re-iterate back through
+--whose turn it currently is
+fixTurnOrder :: Class -> [Class] -> [Class]
+fixTurnOrder turnChar (char:chars) =
+    if turnChar == char then chars ++ [char]
+    else fixTurnOrder turnChar (chars ++ [char])
+fixTurnOrder _ _ = undefined
 
 
 --takes a string, attempts to parse it, checks that formatting is valid and that the given character can in fact perform the action
@@ -262,12 +272,13 @@ getTarget chars targetName =
         target = filter (\c -> name c == targetName) chars
 
 --helper function for replacing all the old characters in the turn list
+--filtering out all the dead characters
 --then re-organizing them into turn order
---need to add checks to filter out dead chars
-replaceOldChars :: [Class] -> [Class] -> [Class]
-replaceOldChars oldList updatedChars = reverse $ sort (updatedChars ++ unaffectedChars)
+updateCharList :: [Class] -> [Class] -> [Class]
+updateCharList oldList updatedChars = reverse $ sort aliveChars
     where
         unaffectedChars = oldList \\ updatedChars
+        aliveChars = filter (\c -> ki (character c) > 0 && stamina (character c) >0) (updatedChars ++ unaffectedChars)
 
 --generic function for using an item
 useItem :: String -> [Class] -> (ItemList -> Int) -> (Character -> ItemList -> (Character, ItemList)) -> Maybe [Class]
@@ -280,8 +291,8 @@ useItem targetName chars@(user:_) numItem itemOp =
         outcome = itemOp (character justTarget) (items user)
         returnList =
             if targetName == name user
-                then [updateItems (updateCharacter user (fst outcome)) (snd outcome)]
-            else [updateItems user (snd outcome), updateCharacter justTarget (fst outcome)]
+                then updateCharList chars [updateItems (updateCharacter user (fst outcome)) (snd outcome)]
+            else updateCharList chars [updateItems user (snd outcome), updateCharacter justTarget (fst outcome)]
 
 useItem _ _ _ _ = undefined
 
@@ -298,8 +309,8 @@ performSingleLevelAction (level:targetName:_) chars@(user:_) validLevels hasActi
         outcome = action (character user) (character justTarget) (fromJust levelMaybe)
         returnList =
             if targetName == name user
-                then [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
-            else [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
+                then updateCharList chars [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
+            else updateCharList chars [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
 
 performSingleLevelAction _ _ _ _ _ = undefined
 
@@ -328,7 +339,7 @@ performGroupLevelAction _ _ _ _ _ _ = undefined
 
 --generic function for using a single target status move
 performStatusSingle :: String -> [Class] -> (Class -> Bool) -> (Character -> Character -> (Character, Character)) -> Maybe [Class]
-performStatusSingle targetName chars@(user:_) hasAction action = 
+performStatusSingle targetName chars@(user:_) hasAction action =
     if isNothing target || not (hasAction user) then Nothing
     else Just returnList
     where
@@ -337,7 +348,7 @@ performStatusSingle targetName chars@(user:_) hasAction action =
         outcome = action (character user) (character justTarget)
         returnList =
             if targetName == name user
-                then [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
-            else [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
+                then updateCharList chars [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
+            else updateCharList chars [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
 
 performStatusSingle _ _ _ _ = undefined

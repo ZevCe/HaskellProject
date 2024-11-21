@@ -30,3 +30,18 @@ instance Ord Class where
 
 instance Show Class where
     show c = name c ++ "\n" ++ show (character c)
+
+--functions for changing the character or items of a class
+updateCharacter :: Class -> Character -> Class
+updateCharacter char newChar =
+     Class newChar (items char) (name char) (team char)
+    (stamAttack char) (kiAttack char) (heal char) (rally char)
+    (invigorate char) (demoralize char) (intimidate char) (shield char)
+    (amplify char) (dampen char) (curse char) (barrier char)
+
+updateItems :: Class -> ItemList -> Class
+updateItems char newItems =
+    Class (character char) newItems (name char) (team char)
+    (stamAttack char) (kiAttack char) (heal char) (rally char)
+    (invigorate char) (demoralize char) (intimidate char) (shield char)
+    (amplify char) (dampen char) (curse char) (barrier char)
