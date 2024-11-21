@@ -82,4 +82,5 @@ getHaskeleton = Class
                 (makeCharacter 50 20 50)
                 (ItemList 0 0 1 0 0 0)
                 "Haskeleton" "Enemy"
-                True False False False False False                True False False False False False
+                True False False False False False                
+                True False False False False False

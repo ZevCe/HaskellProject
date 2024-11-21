@@ -30,7 +30,8 @@ staminaSingleAttack user target level =
         buffedUser = modifyStatuses user (filter (\x -> x /= "invigorate" && x /= "demoralize") (statuses user))
         buffedTarget = modifyStatuses target (filter (\x -> x /= "intimidate" && x /= "shield") (statuses target))
         newUser = modifyStamina buffedUser stamUsed
-        newTarget = modifyStamina buffedTarget $ (atk `div` def) * (-10 + stamUsed) * attackMods * defenseMods
+        damageDealt = min (-1) $ (atk `div` def) * (-10 + stamUsed) * attackMods * defenseMods
+        newTarget = modifyStamina buffedTarget damageDealt 
 
 --valid levels are 1-2
 staminaGroupAttack :: Character -> [Character] -> Int -> (Character, [Character])
@@ -66,7 +67,8 @@ kiSingleAttack user target level =
         buffedUser = modifyStatuses user (filter (\x -> x /= "amplify" && x /= "dampen") (statuses user))
         buffedTarget = modifyStatuses target (filter (\x -> x /= "curse" && x /= "barrier") (statuses target))
         newUser = modifyKi buffedUser kiUsed
-        newTarget = modifyKi buffedTarget $ (atk `div` def) * (-10 + kiUsed) * attackMods * defenseMods
+        damageDealt = min (-1) $ (atk `div` def) * (-10 + kiUsed) * attackMods * defenseMods
+        newTarget = modifyKi buffedTarget damageDealt
 
 --valid levels are 1-2
 kiGroupAttack :: Character -> [Character] -> Int -> (Character, [Character])

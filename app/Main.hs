@@ -350,24 +350,13 @@ performStatusSingle _ _ _ _ = undefined
 
 enemyActions :: [Class] -> IO [Class]
 enemyActions chars@(turnChar:_) = do
-    if stamAttack turnChar then do
-        putStrLn "happen1"
-        result <- enemyAttack chars stamina staminaSingleAttack
-        return $ fixTurnOrder turnChar result
-    else do
-        putStrLn "happen2"
-        result <- enemyAttack chars ki kiSingleAttack
-        return $ fixTurnOrder turnChar result
+    if stamAttack turnChar then return $ fixTurnOrder turnChar $ enemyAttack chars stamina staminaSingleAttack
+    else return $ fixTurnOrder turnChar $ enemyAttack chars ki kiSingleAttack
 
 enemyActions _ = undefined
 
-enemyAttack :: [Class] -> (Character -> Int) -> (Character -> Character -> Int -> (Character, Character)) -> IO [Class]
-enemyAttack chars@(turnChar:_) stat attack = do
-    putStrLn "Chosen target"
-    print bestTarget
-    putStrLn "unprocessed result of attack"
-    print outcome
-    return returnList 
+enemyAttack :: [Class] -> (Character -> Int) -> (Character -> Character -> Int -> (Character, Character)) -> [Class]
+enemyAttack chars@(turnChar:_) stat attack = returnList 
     where 
         potentialTargets = friendTeam chars
         bestTarget = minimumBy (\c1 c2 -> compare (stat (character c1)) (stat (character c2))) potentialTargets
