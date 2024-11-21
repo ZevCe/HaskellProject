@@ -86,6 +86,7 @@ testThrowingKnives = TestCase $ do
     print $ useThrowingKnives p2 items
 
     assertEqual "Throwing Knives Test" p1 p2
-    
+
+testItems :: Test    
 testItems = TestList [TestLabel "testHealthPotion" testHealthPotion, TestLabel "testManaPotion" testManaPotion, TestLabel "testHastePotion" testHastePotion, TestLabel "testWebTrap" testWebTrap, TestLabel "testThrowingKnives" testThrowingKnives]
 
