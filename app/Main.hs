@@ -32,27 +32,24 @@ main = do
 --and handling input parsing
 gameLoop :: [Class] -> IO ()
 gameLoop [] = putStrLn "\nNeither team has any characters still capable of fighting, you have both lost today"
-gameLoop (turnChar:chars) = do
+gameLoop chars@(turnChar:_) = do
     putStrLn ("Start of " ++ name turnChar ++ "'s turn")
     threadDelay 500000
-    if team turnChar == "Friend"
-        then do
-            putStrLn "Friends' Stats:"
-            printField (friendTeam (turnChar:chars))
-            threadDelay 500000
-            putStrLn "Enemies' Stats:"
-            printField (enemyTeam (turnChar:chars))
-            threadDelay 500000
-            printActions turnChar
-            results <- processInput (turnChar:chars)
-            battleState <- checkForEndOfBattle results
-            if battleState == "f" then putStrLn "\nA winner is you!"
-            else if battleState == "e" then putStrLn "\nA loser is you!"
-            else gameLoop results
+    if team turnChar == "Friend" then do
+        putStrLn "Friends' Stats:"
+        printField (friendTeam chars)
+        threadDelay 500000
+        putStrLn "Enemies' Stats:"
+        printField (enemyTeam chars)
+        threadDelay 500000
+        printActions turnChar
+        results <- processInput chars
+        checkForEndOfBattle results
     else do
         putStrLn (name turnChar ++ " attacks\n")
         threadDelay 500000
-        gameLoop (chars ++ [turnChar])
+        results <- enemyActions chars
+        checkForEndOfBattle results
 
 --displays state of all characters currently
 printField :: [Class] -> IO ()
@@ -111,11 +108,11 @@ printActions char = do
 --will return f if friendly team has won battle
 --will return e if enemy team has won battle
 --will return n if neither team has won battle
-checkForEndOfBattle :: [Class] -> IO String
+checkForEndOfBattle :: [Class] -> IO ()
 checkForEndOfBattle chars
-  | enemyTeamSize == 0 = return "f"
-  | friendlyTeamSize == 0 = return "e"
-  | otherwise = return "n"
+  | enemyTeamSize == 0 = putStrLn "\nA winner is you!"
+  | friendlyTeamSize == 0 = putStrLn "\nA loser is you!"
+  | otherwise = gameLoop chars
     where
         enemyTeamSize = length (enemyTeam chars)
         friendlyTeamSize = length (friendTeam chars)
@@ -350,3 +347,34 @@ performStatusSingle targetName chars@(user:_) hasAction action =
             else updateCharList chars [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
 
 performStatusSingle _ _ _ _ = undefined
+
+enemyActions :: [Class] -> IO [Class]
+enemyActions chars@(turnChar:_) = do
+    if stamAttack turnChar then do
+        putStrLn "happen1"
+        result <- enemyAttack chars stamina staminaSingleAttack
+        return $ fixTurnOrder turnChar result
+    else do
+        putStrLn "happen2"
+        result <- enemyAttack chars ki kiSingleAttack
+        return $ fixTurnOrder turnChar result
+
+enemyActions _ = undefined
+
+enemyAttack :: [Class] -> (Character -> Int) -> (Character -> Character -> Int -> (Character, Character)) -> IO [Class]
+enemyAttack chars@(turnChar:_) stat attack = do
+    putStrLn "Chosen target"
+    print bestTarget
+    putStrLn "unprocessed result of attack"
+    print outcome
+    return returnList 
+    where 
+        potentialTargets = friendTeam chars
+        bestTarget = minimumBy (\c1 c2 -> compare (stat (character c1)) (stat (character c2))) potentialTargets
+        outcome = attack (character turnChar) (character bestTarget) 0
+        returnList =
+            if turnChar == bestTarget
+                then updateCharList chars [updateCharacter (updateCharacter turnChar (fst outcome)) (snd outcome)]
+            else updateCharList chars [updateCharacter turnChar (fst outcome), updateCharacter bestTarget (snd outcome)]
+
+enemyAttack _ _ _ = undefined

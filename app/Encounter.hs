@@ -5,13 +5,12 @@ import Class
 import Item
 
 getEncounterTutorial :: [Class]
-getEncounterTutorial = [getGod] ++ [getRat]
+getEncounterTutorial = [getGod, getRat]
 
 -- Warrior, Cleric
 -- Haskeleton, Rat
 getBasicEncounter1 :: [Class]
-getBasicEncounter1 = [(getWarrior "Zev")] ++ [(getCleric "David")] ++ 
-                        [getHaskeleton] ++ [getRat]
+getBasicEncounter1 = [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
 
 -- Doesn't take into account invalid names, maybe a ST fix later
 -- Class
@@ -35,7 +34,7 @@ getGod = Class
             True True True True True True
 
 getWarrior :: String -> Class
-getWarrior name = Class 
+getWarrior name = Class
                     (makeCharacter 100 30 60)
                     (ItemList 2 1 0 0 1 1)
                     name "Friend"
@@ -43,7 +42,7 @@ getWarrior name = Class
                     False True False False False False
 
 getCleric :: String -> Class
-getCleric name = Class 
+getCleric name = Class
                     (makeCharacter 60 100 40)
                     (ItemList 1 3 0 2 0 0)
                     name "Friend"
@@ -51,7 +50,7 @@ getCleric name = Class
                     False False False True False True
 
 getRogue :: String -> Class
-getRogue name = Class 
+getRogue name = Class
                     (makeCharacter 80 40 100)
                     (ItemList 2 1 2 0 1 0)
                     name "Friend"
@@ -59,7 +58,7 @@ getRogue name = Class
                     True False False False False False
 
 getMage :: String -> Class
-getMage name = Class 
+getMage name = Class
                     (makeCharacter 50 100 30)
                     (ItemList 1 2 0 1 0 0)
                     name "Friend"
@@ -79,9 +78,8 @@ getRat = Class
             False False False False False False
 
 getHaskeleton :: Class
-getHaskeleton = Class 
+getHaskeleton = Class
                 (makeCharacter 50 20 50)
                 (ItemList 0 0 1 0 0 0)
                 "Haskeleton" "Enemy"
-                True False False False False False
-                True False False False False False            
+                True False False False False False                True False False False False False
