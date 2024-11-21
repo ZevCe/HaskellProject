@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 import Character
+import Class
+import Encounter
 import Item
 import Actions
 import Data.List
@@ -17,34 +19,6 @@ main = scotty 3000 $
         beam <- pathParam "word"
         html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
 -}
-
-data Class =
-    Class {
-        character :: Character,
-        items     :: ItemList,
-        name      :: String,
-        team      :: String,
-        stamAttack   :: Bool,
-        kiAttack     :: Bool,
-        heal         :: Bool,
-        rally        :: Bool,
-        invigorate   :: Bool,
-        demoralize   :: Bool,
-        intimidate   :: Bool,
-        shield       :: Bool,
-        amplify      :: Bool,
-        dampen       :: Bool,
-        curse        :: Bool,
-        barrier      :: Bool}
-
-instance Eq Class where
-    c1 == c2 = name c1 == name c2
-
-instance Ord Class where
-    compare c1 c2 = compare (character c1) (character c2)
-
-instance Show Class where
-    show c = name c ++ "\n" ++ show (character c)
 
 --functions for changing the character or items of a class
 updateCharacter :: Class -> Character -> Class
@@ -65,20 +39,9 @@ updateItems char newItems =
 --creates the classes and starts the main game loop
 main :: IO ()
 main = do
-    let class1 = Class
-                (makeCharacter 100 100 100)
-                (ItemList 1 1 1 1 1 1)
-                "God" "Friend"
-                True True True True True True
-                True True True True True True
-        class2 = Class
-                (makeCharacter 10 10 10)
-                (ItemList 0 0 0 0 0 0)
-                "Rat" "Enemy"
-                True False False False False False
-                False False False False False False
-        turnList = reverse $ sort [class1, class2]
-    gameLoop turnList
+        let encounter = getBasicEncounter1
+        let turnList = reverse $ sort encounter
+        gameLoop turnList
 
 
 --top level function responsible for keeping track of current turn 
