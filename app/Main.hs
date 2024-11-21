@@ -23,7 +23,7 @@ main = scotty 3000 $
 --creates the classes and starts the main game loop
 main :: IO ()
 main = do
-        let encounter = getBasicEncounter1
+        let encounter = getBasicEncounter2
         let turnList = reverse $ sort encounter
         gameLoop turnList
 

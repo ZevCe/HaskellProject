@@ -12,6 +12,11 @@ getEncounterTutorial = [getGod, getRat]
 getBasicEncounter1 :: [Class]
 getBasicEncounter1 = [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
 
+--1x warrior, 1x mage, 1x cleric, 1x rogue
+--2x rogue, 2x mage
+getBasicEncounter2 :: [Class]
+getBasicEncounter2 = [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein", evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
+
 -- Doesn't take into account invalid names, maybe a ST fix later
 -- Class
 -- makeCharacter Stamina Ki Speed
@@ -34,34 +39,34 @@ getGod = Class
             True True True True True True
 
 getWarrior :: String -> Class
-getWarrior name = Class
+getWarrior tname = Class
                     (makeCharacter 100 30 60)
                     (ItemList 2 1 0 0 1 1)
-                    name "Friend"
+                    tname "Friend"
                     True False False True False True
                     False True False False False False
 
 getCleric :: String -> Class
-getCleric name = Class
+getCleric tname = Class
                     (makeCharacter 60 100 40)
                     (ItemList 1 3 0 2 0 0)
-                    name "Friend"
+                    tname "Friend"
                     False True True False False False
                     False False False True False True
 
 getRogue :: String -> Class
-getRogue name = Class
+getRogue tname = Class
                     (makeCharacter 80 40 100)
                     (ItemList 2 1 2 0 1 0)
-                    name "Friend"
+                    tname "Friend"
                     True False False False True False
                     True False False False False False
 
 getMage :: String -> Class
-getMage name = Class
+getMage tname = Class
                     (makeCharacter 50 100 30)
                     (ItemList 1 2 0 1 0 0)
-                    name "Friend"
+                    tname "Friend"
                     False True False False False False
                     False False True False True False
 
@@ -84,3 +89,21 @@ getHaskeleton = Class
                 "Haskeleton" "Enemy"
                 True False False False False False                
                 True False False False False False
+
+
+evilRogue :: String -> Class
+evilRogue tname = Class
+                    (makeCharacter 80 40 100)
+                    (ItemList 2 1 2 0 1 0)
+                    tname "Enemy"
+                    True False False False True False
+                    True False False False False False
+
+evilMage :: String -> Class
+evilMage tname = Class
+                    (makeCharacter 50 100 30)
+                    (ItemList 1 2 0 1 0 0)
+                    tname "Enemy"
+                    False True False False False False
+                    False False True False True False
+
