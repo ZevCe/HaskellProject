@@ -78,7 +78,7 @@ printActions char = do
     threadDelay 500000
 
     --printing items
-    putStrLn "Items:"
+    putStrLn (name char ++ "'s Items:")
     displayItem (numHealthPotions itemList) "(HeP <target>) Health Potions: "
     displayItem (numManaPotions itemList) "(MP <target>) Mana Potions: "
     displayItem (numThrowingKnives itemList) "(TK <target>) Throwing Knives: "
@@ -89,7 +89,7 @@ printActions char = do
     threadDelay 500000
 
     --printing actions
-    putStrLn "\nActions:"
+    putStrLn ("\n" ++ name char ++ "'s Actions:")
     displayAction (stamAttack char) "(SA <0|1|2|3> <target>) Stamina Attack Single\n(SAA <1|2>) Stamina Attack All"
     displayAction (kiAttack char) "(KA <0|1|2|3> <target>) Ki Attack Single\n(KAA <1|2>) Ki Attack All"
     displayAction (heal char) "(Hl <1|2|3> <target>) Heal Single\n(HlA <1|2>) Heal All"
@@ -141,8 +141,6 @@ processInput chars@(user:_) = do
     else do
         let justResult = fromJust result
         printDeadChars $ chars \\ justResult
-        putStrLn "Returned results: "
-        print justResult
         if user `notElem` justResult then do
             putStrLn "Turn Character has died, turn order will be reset"
             return justResult
@@ -283,14 +281,14 @@ updateCharList oldList updatedChars = reverse $ sort aliveChars
 --generic function for using an item
 useItem :: String -> [Class] -> (ItemList -> Int) -> (Character -> ItemList -> (Character, ItemList)) -> Maybe [Class]
 useItem targetName chars@(user:_) numItem itemOp =
-    if isNothing target || numItem (items justTarget) == 0 then Nothing
+    if isNothing target || numItem (items user) == 0 then Nothing
     else Just returnList
     where
         target = getTarget chars targetName
         justTarget = fromJust target
         outcome = itemOp (character justTarget) (items user)
         returnList =
-            if targetName == name user
+            if justTarget == user
                 then updateCharList chars [updateItems (updateCharacter user (fst outcome)) (snd outcome)]
             else updateCharList chars [updateItems user (snd outcome), updateCharacter justTarget (fst outcome)]
 
@@ -308,7 +306,7 @@ performSingleLevelAction (level:targetName:_) chars@(user:_) validLevels hasActi
         levelMaybe = readMaybe level :: Maybe Int
         outcome = action (character user) (character justTarget) (fromJust levelMaybe)
         returnList =
-            if targetName == name user
+            if justTarget == user
                 then updateCharList chars [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
             else updateCharList chars [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
 
@@ -347,7 +345,7 @@ performStatusSingle targetName chars@(user:_) hasAction action =
         justTarget = fromJust target
         outcome = action (character user) (character justTarget)
         returnList =
-            if targetName == name user
+            if justTarget == user
                 then updateCharList chars [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
             else updateCharList chars [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
 
