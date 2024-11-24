@@ -1,0 +1,8 @@
+#mainWindow{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.characterDisplay{
+    flex-basis: 50%;
+}
