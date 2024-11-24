@@ -1,36 +1,32 @@
--- {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
-module Main where
--- import Character
--- import Class
--- import Encounter
--- import Item
--- import Actions
--- import Data.List
--- import Data.Maybe
--- import Control.Concurrent
--- import Text.Read (readMaybe)
+{-# LANGUAGE OverloadedStrings #-}
 
--- import Web.Scotty
-import Data.Aeson
 import GHC.Generics
+import Data.Aeson
+import Web.Scotty
+-- import Blaze.ByteString.Builder
+-- import Network.Wai.Middleware.Cors
+
+data User = User { name :: String, age :: Int } deriving (Show, Generic)
+instance FromJSON User
+instance ToJSON User
 
 main :: IO ()
-main = undefined
--- main = scotty 3000 $
---     get "/:word" $ do
---         beam <- pathParam "word"
---         html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
+main = scotty 3000 $ do
+    -- middleware simpleCors
+    get "/" $ do 
+      file "./frontend/index.html"
+    
+    get "/script.js" $ do
+      file "./frontend/script.js"
 
-data Person = Person {
-    name :: String
-  , age :: Int
-} deriving (Generic, Show)
-
-instance ToJSON Person where
-    toEncoding = genericToEncoding Data.Aeson.defaultOptions
-
-instance FromJSON Person
+    get "/style.css" $ do
+      file "./frontend/style.css"
+      
+    post "/api/user" $ do
+        user <- jsonData :: ActionM User
+        liftIO $ print user
+        json user
 
 -- --creates the classes and starts the main game loop
 -- main :: IO ()
