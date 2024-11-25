@@ -1,4 +1,4 @@
-module Encounter where
+{-module Encounter where
 
 import Character
 import Class
@@ -106,4 +106,4 @@ evilMage tname = Class
                     tname "Enemy"
                     False True False False False False
                     False False True False True False
-
+-}

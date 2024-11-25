@@ -1,11 +1,241 @@
 module Actions where
+--somebody smarter than me should do the thing where you only export certain functions
+--and the only function we need to export from this file is performAction
+
 
 import Character
 
---main attack functions, will only get more complex as time goes on and we start
---having to check for various status conditions before attacking as well
---keep trying to simplify in any way we can, very important to do so
+--takes a list of strings and a list of all characters, pattern matches the string list
+--to determine which actions to perform and then returns an updated list of characters
+--will eventually instead return a log keeping track of which actions happened throughout
+--Assumptions:
+--The first character in the list of characters is the one performing the action
+--The action specified by the list of strings is valid
+--The character can perform the given action (i.e. has enough items/ki/stamina or the ability to use action in the first place)
+performAction :: [String] -> [Character] -> [Character]
 
+--use health potion
+performAction ("HeP":targetName:_) chars@(user:_) = useItem targetName chars restoreOperation usedItems
+    where
+        restoreOperation target = modifyStamina target $ min 20 $ maxStamina target - stamina target
+
+        usedItems = ItemList
+            (numHealthPotions (items user) - 1) (numManaPotions $ items user) (numThrowingKnives $ items user)
+            (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
+
+--use mana potion
+performAction ("MP":targetName:_) chars@(user:_) = useItem targetName chars restoreOperation usedItems
+    where 
+        restoreOperation target = modifyKi target $ min 20 $ maxKi target - ki target
+        
+        usedItems = ItemList 
+            (numHealthPotions $ items user) (numManaPotions (items user) - 1) (numThrowingKnives $ items user)
+            (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
+
+
+--use throwing knives
+performAction ("TK":targetName:_) chars@(user:_) = useItem targetName chars damageOperation usedItems
+    where
+        damageOperation target = modifyStamina target (-20)
+        
+        usedItems = ItemList 
+            (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives (items user) - 1) 
+            (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
+
+
+--use magial seal
+performAction ("MS":targetName:_) chars@(user:_) = useItem targetName chars damageOperation usedItems
+    where
+        damageOperation target = modifyKi target (-20)
+        
+        usedItems = ItemList 
+            (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user)
+            (numMagicalSeals (items user) - 1) (numWebTraps $ items user) (numHastePotions $ items user)
+        
+
+--use web trap
+performAction ("WT":targetName:_) chars@(user:_) = useItem targetName chars speedOperation usedItems
+    where
+        speedOperation target = modifyStatuses (modifySpeed target (-(speed target `div` 2))) ("webTrap" : statuses target)
+
+        usedItems = ItemList 
+            (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user) 
+            (numMagicalSeals $ items user) (numWebTraps (items user) - 1) (numHastePotions $ items user)
+
+--use haste potion
+performAction ("HaP":targetName:_) chars@(user:_) = useItem targetName chars speedOperation usedItems
+    where
+        speedOperation target = modifyStatuses (modifySpeed target $ speed target) ("hastePotion" : statuses target)
+
+        usedItems = ItemList 
+            (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user) 
+            (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions (items user) - 1)
+        
+-- --use stamina attack
+-- performAction ("SA":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [0,1,2,3] stamAttack staminaSingleAttack
+
+-- --use group stamina attack
+-- --performAction ("SAA":level:_) chars = performGroupLevelAction level chars [1,2] enemyTeam stamAttack staminaGroupAttack
+
+-- --use ki attack
+-- performAction ("KA":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [0,1,2,3] kiAttack kiSingleAttack
+
+-- --use group ki attack
+-- --performAction ("KAA":level:_) chars = performGroupLevelAction level chars [1,2] enemyTeam kiAttack kiGroupAttack
+
+-- --use heal
+-- performAction ("Hl":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [1,2,3] heal healSingle
+
+-- --use group heal
+-- --performAction ("HlA":level:_) chars = performGroupLevelAction level chars [1,2] friendTeam heal healGroup
+
+-- --use rally
+-- performAction ("Rly":level:targetName:_) chars = performSingleLevelAction (level:[targetName]) chars [1,2,3] rally rallySingle
+
+-- --use group rally
+-- --performAction ("RlyA":level:_) chars = performGroupLevelAction level chars [1,2] friendTeam rally rallyGroup
+
+-- --use invigorate
+-- performAction ("Invig":targetName:_) chars = performStatusSingle targetName chars invigorate invigorateSingle
+
+-- --use group invigorate
+-- --performAction ("InvigA":_) (user:chars) = undefined
+
+-- --use demoralize
+-- performAction ("Demor":targetName:_) chars = performStatusSingle targetName chars demoralize demoralizeSingle
+
+-- --use group demoralize
+-- --performAction ("DemorA":_) (user:chars) = undefined
+
+-- --use intimidate
+-- performAction ("Intim":targetName:_) chars = performStatusSingle targetName chars intimidate intimidateSingle
+
+-- --use group intimidate
+-- --performAction ("IntimA":_) (user:chars) = undefined
+
+-- --use shield
+-- performAction ("Shld":targetName:_) chars = performStatusSingle targetName chars shield shieldSingle
+
+-- --use group shield 
+-- --performAction ("ShldA":_) (user:chars) = undefined
+
+-- --use amplify
+-- performAction ("Amp":targetName:_) chars = performStatusSingle targetName chars amplify amplifySingle
+
+-- --use group amplify 
+-- --performAction ("AmpA":_) (user:chars) = undefined
+
+-- --use dampen
+-- performAction ("Damp":targetName:_) chars = performStatusSingle targetName chars dampen dampenSingle
+
+-- --use group dampen
+-- --performAction ("DampA":_) (user:chars) = undefined
+
+-- --use curse
+-- performAction ("Crs":targetName:_) chars = performStatusSingle targetName chars curse curseSingle
+
+-- --use group curse
+-- --performAction ("CrsA":_) (user:chars) = undefined
+
+-- --use barrier
+-- performAction ("Brr":targetName:_) chars = performStatusSingle targetName chars barrier barrierSingle
+
+-- --use group barrier
+-- --performAction ("BrrA":_) (user:chars) = undefined
+
+performAction _ _ = undefined
+
+--generic function for using an item
+useItem :: String -> [Character] -> (Character -> Character) -> ItemList -> [Character]
+useItem targetName chars@(user:_) itemOperation newItemList = returnList
+    where
+        target = getTarget chars targetName
+        newTarget = itemOperation target
+        returnList =
+            if target == user then updateCharList chars [modifyItems newTarget newItemList]
+            else updateCharList chars [modifyItems user newItemList, newTarget]
+
+useItem _ _ _ _  = undefined
+
+
+-- --generic function for using single target actions which take a level
+-- performSingleLevelAction :: [String] -> [Class] ->  [Int] -> (Class -> Bool) -> (Character -> Character -> Int -> (Character, Character)) -> Maybe [Class]
+-- performSingleLevelAction (level:targetName:_) chars@(user:_) validLevels hasAction action =
+--     if isNothing target || isNothing levelMaybe || fromJust levelMaybe `notElem` validLevels || not (hasAction user)
+--         then Nothing
+--     else Just returnList
+--     where
+--         target = getTarget chars targetName
+--         justTarget = fromJust target
+--         levelMaybe = readMaybe level :: Maybe Int
+--         outcome = action (character user) (character justTarget) (fromJust levelMaybe)
+--         returnList =
+--             if justTarget == user
+--                 then updateCharList chars [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
+--             else updateCharList chars [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
+
+-- performSingleLevelAction _ _ _ _ _ = undefined
+
+-- --generic function for using group actions which take a level
+-- --need to refactor character to also have name so we can match character to class
+-- {-
+-- performGroupLevelAction :: String -> [Class] -> [Int] -> ([Class] -> [Class]) -> 
+--     (Class -> Bool) -> (Character -> [Character] -> Int -> (Character, [Character])) -> Maybe [Class]
+
+-- performGroupLevelAction level chars@(user:_) validLevels filterTeam hasAction action = 
+--     if isNothing levelMaybe || fromJust levelMaybe `notElem` validLevels || not (hasAction user) then Nothing
+--     else Just returnList
+--     where
+--         levelMaybe = readMaybe level :: Maybe Int
+--         targetChars = [character curChar | curChar <- filterTeam chars]
+--         outcome = action (character user) targetChars (fromJust levelMaybe)
+--         --if this doesnt work how I want it to may have to rethink large parts of program or cut group attacks for the time being
+--         updatedTargets = [updateCharacter curClass curChar | curClass <- filterTeam chars, curChar <- snd outcome]
+--         returnList = 
+--             if user `elem` updatedTargets 
+--                 then undefined
+--             else updateCharacter user (fst outcome) : updatedTargets
+
+-- performGroupLevelAction _ _ _ _ _ _ = undefined
+-- -}
+
+-- --generic function for using a single target status move
+-- performStatusSingle :: String -> [Class] -> (Class -> Bool) -> (Character -> Character -> (Character, Character)) -> Maybe [Class]
+-- performStatusSingle targetName chars@(user:_) hasAction action =
+--     if isNothing target || not (hasAction user) then Nothing
+--     else Just returnList
+--     where
+--         target = getTarget chars targetName
+--         justTarget = fromJust target
+--         outcome = action (character user) (character justTarget)
+--         returnList =
+--             if justTarget == user
+--                 then updateCharList chars [updateCharacter (updateCharacter user (fst outcome)) (snd outcome)]
+--             else updateCharList chars [updateCharacter user (fst outcome), updateCharacter justTarget (snd outcome)]
+
+-- performStatusSingle _ _ _ _ = undefined
+
+-- enemyActions :: [Class] -> IO [Class]
+-- enemyActions chars@(turnChar:_) = do
+--     if stamAttack turnChar then return $ fixTurnOrder turnChar $ enemyAttack chars stamina staminaSingleAttack
+--     else return $ fixTurnOrder turnChar $ enemyAttack chars ki kiSingleAttack
+
+-- enemyActions _ = undefined
+
+-- enemyAttack :: [Class] -> (Character -> Int) -> (Character -> Character -> Int -> (Character, Character)) -> [Class]
+-- enemyAttack chars@(turnChar:_) stat attack = returnList 
+--     where 
+--         potentialTargets = friendTeam chars
+--         bestTarget = minimumBy (\c1 c2 -> compare (stat (character c1)) (stat (character c2))) potentialTargets
+--         outcome = attack (character turnChar) (character bestTarget) 0
+--         returnList =
+--             if turnChar == bestTarget
+--                 then updateCharList chars [updateCharacter (updateCharacter turnChar (fst outcome)) (snd outcome)]
+--             else updateCharList chars [updateCharacter turnChar (fst outcome), updateCharacter bestTarget (snd outcome)]
+
+-- enemyAttack _ _ _ = undefined
+
+{-
 --valid levels are 0-3
 staminaSingleAttack :: Character -> Character -> Int -> (Character, Character)
 staminaSingleAttack user target level =
@@ -31,7 +261,7 @@ staminaSingleAttack user target level =
         buffedTarget = modifyStatuses target (filter (\x -> x /= "intimidate" && x /= "shield") (statuses target))
         newUser = modifyStamina buffedUser stamUsed
         damageDealt = min (-1) $ (atk `div` def) * (-10 + stamUsed) * attackMods * defenseMods
-        newTarget = modifyStamina buffedTarget damageDealt 
+        newTarget = modifyStamina buffedTarget damageDealt
 
 --valid levels are 1-2
 staminaGroupAttack :: Character -> [Character] -> Int -> (Character, [Character])
@@ -103,7 +333,7 @@ healGroup user targets level =
 
 --valid levels are 1-3
 rallySingle :: Character -> Character -> Int -> (Character, Character)
-rallySingle user target level = 
+rallySingle user target level =
     if stamina newUser >= 0
         then (newUser, newTarget)
     else (user, target)
@@ -114,7 +344,7 @@ rallySingle user target level =
 
 --valid levels are 1-2
 rallyGroup :: Character -> [Character] -> Int -> (Character, [Character])
-rallyGroup user targets level = 
+rallyGroup user targets level =
     if stamina newUser >= 0
         then (newUser, newTargets)
     else (user, targets)
@@ -214,6 +444,4 @@ barrierSingle user target = applyKiStatusSingle user target (-25) "barrier"
 
 barrierGroup :: Character -> [Character] -> (Character, [Character])
 barrierGroup user target = applyKiStatusGroup user target (-60) "barrier"
-
-
---if extra time add status effects which cause next action to cost double/half
+-}

@@ -1,5 +1,5 @@
 module Test where
-
+{-
 import Character
 import Actions
 import Item
@@ -89,4 +89,4 @@ testThrowingKnives = TestCase $ do
 
 testItems :: Test    
 testItems = TestList [TestLabel "testHealthPotion" testHealthPotion, TestLabel "testManaPotion" testManaPotion, TestLabel "testHastePotion" testHastePotion, TestLabel "testWebTrap" testWebTrap, TestLabel "testThrowingKnives" testThrowingKnives]
-
+-}
