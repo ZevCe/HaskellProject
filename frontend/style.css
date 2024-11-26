@@ -9,7 +9,9 @@
 .friend-display,
 .menu,
 .combat-log,
-.character {
+.character,
+.stat-block,
+.portrait {
     border: 2px, solid, black;
 }
 
@@ -18,11 +20,13 @@
     border-color: red;
 }
 
-.menu {
+.menu,
+.stat-block {
     border-color: green;
 }
 
-.combat-log {
+.combat-log,
+.portrait {
     border-color: purple;
 }
 
@@ -86,4 +90,10 @@ button {
  .character {
     width: 64px;
     height: 128px;
+ }
+
+ .character .portrait,
+ .character .stat-block {
+    width: 64px;
+    height: 64px;
  }
