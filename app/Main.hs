@@ -21,7 +21,7 @@ main = scotty 3000 $ do
     get "/loadEncounter/:num" $ do
       numString <- pathParam "num"
       liftIO $ print numString
-      json (NetworkPacket [] $ getEncounter numString)
+      json (getEncounter numString)
 
     --post request for calculating new info for a round
     post "/roundInfo" $ do

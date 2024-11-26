@@ -1,23 +1,61 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Encounter where
 
 import Character
+import GHC.Generics
+import Data.Aeson
 
-encounterTutorial :: [Character]
-encounterTutorial = getTurnOrder [getGod, getRat]
+data ClassSkills = 
+    ClassSkills { name         :: String,
+                  stamAttack   :: Bool,
+                  kiAttack     :: Bool,
+                  heal         :: Bool,
+                  rally        :: Bool,
+                  invigorate   :: Bool,
+                  demoralize   :: Bool,
+                  intimidate   :: Bool,
+                  shield       :: Bool,
+                  amplify      :: Bool,
+                  dampen       :: Bool,
+                  curse        :: Bool,
+                  barrier      :: Bool}
+                  deriving(Generic)
+
+instance FromJSON ClassSkills
+instance ToJSON ClassSkills
+
+data EncounterInfo = 
+    EncounterInfo  { classes :: [ClassSkills],
+                     initTurnOrderurnOrder :: [Character]}
+                     deriving(Generic)
+
+instance FromJSON EncounterInfo
+instance ToJSON EncounterInfo    
+
+--helper function for turning list of characters into encounter info datatype
+parseToEncounterInfo :: [(ClassSkills, Character)] -> EncounterInfo
+parseToEncounterInfo fullInfo = EncounterInfo classSkills turnOrd
+    where 
+        classSkills = [fst curChar | curChar <- fullInfo]
+        turnOrd = getTurnOrder [snd curChar | curChar <- fullInfo]
+
+encounterTutorial :: EncounterInfo 
+encounterTutorial =  parseToEncounterInfo [getGod, getRat]
+
 
 -- Warrior, Cleric
 -- Haskeleton, Rat
-encounter1 :: [Character]
-encounter1 = getTurnOrder [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
+encounter1 :: EncounterInfo
+encounter1 = parseToEncounterInfo [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
 
 --1x warrior, 1x mage, 1x cleric, 1x rogue
 --2x rogue, 2x mage
-encounter2 :: [Character]
-encounter2 = getTurnOrder
+encounter2 :: EncounterInfo
+encounter2 = parseToEncounterInfo
     [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein", 
     evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
 
-getEncounter :: String -> [Character]
+getEncounter :: String -> EncounterInfo
 getEncounter input
      | input == "1" = encounter1
      | input == "2" = encounter2
@@ -42,51 +80,63 @@ makeEnemy na sta k spd =
 --  Allies  --
 --------------
 
-getGod :: Character
-getGod = makeFriend "God" (ItemList 1 1 1 1 1 1) 100 100 100
+getGod :: (ClassSkills, Character)
+getGod = (skills, char)
+    where
+        skills = ClassSkills "God" True True True True True True True True True True True True
+        char = makeFriend "God" (ItemList 1 1 1 1 1 1) 100 100 100
                         
-getWarrior :: String -> Character
-getWarrior na = makeFriend na (ItemList 2 1 0 0 1 1) 100 30 60
---True False False True False True
---False True False False False False
-
+getWarrior :: String -> (ClassSkills, Character)
+getWarrior na = (skills, char)
+    where
+        skills = ClassSkills na True False False True False True False True False False False False
+        char = makeFriend na (ItemList 2 1 0 0 1 1) 100 30 60
                     
-getCleric :: String -> Character
-getCleric na = makeFriend na (ItemList 1 3 0 2 0 0) 60 100 40    
---False True True False False False             
---False False False True False True
+getCleric :: String -> (ClassSkills, Character)
+getCleric na = (skills, char)
+    where
+        skills = ClassSkills na False True True False False False False False False True False True 
+        char = makeFriend na (ItemList 1 3 0 2 0 0) 60 100 40    
 
-getRogue :: String -> Character
-getRogue na = makeFriend na (ItemList 2 1 2 0 1 0) 80 40 100
---True False False False True False
---True False False False False False
+getRogue :: String -> (ClassSkills, Character)
+getRogue na = (skills, char)
+    where
+        skills = ClassSkills na True False False False True False True False False False False False
+        char = makeFriend na (ItemList 2 1 2 0 1 0) 80 40 100
 
-getMage :: String -> Character
-getMage na = makeFriend na (ItemList 1 2 0 1 0 0) 50 100 30
---False True False False False False
---False False True False True False
+getMage :: String -> (ClassSkills, Character)
+getMage na = (skills, char)
+    where
+        skills = ClassSkills na False True False False False False False False True False True False
+        char = makeFriend na (ItemList 1 2 0 1 0 0) 50 100 30
+
 
 ---------------
 --  Enemies  --
 ---------------
 
-getRat :: Character
-getRat = makeEnemy "Rat" 10 10 10
---True False False False False False
---False False False False False False
+getRat :: (ClassSkills, Character)
+getRat = (skills, char)
+    where
+        na = "Rat"
+        skills = ClassSkills na True False False False False False False False False False False False
+        char = makeEnemy na 10 10 10
 
-getHaskeleton :: Character
-getHaskeleton = makeEnemy "Haskeleton" 50 20 50
---True False False False False False                
---True False False False False False
+getHaskeleton :: (ClassSkills, Character)
+getHaskeleton = (skills, char)
+    where
+        na = "Haskeleton"
+        skills = ClassSkills na True False False False False False True False False False False False
+        char = makeEnemy na 50 20 50
 
+evilRogue :: String -> (ClassSkills, Character)
+evilRogue na = (skills, char)
+    where
+        skills = ClassSkills na True False False False True False True False False False False False
+        char = makeEnemy na 80 40 100
 
-evilRogue :: String -> Character
-evilRogue na = makeEnemy na 80 40 100
---True False False False True False
---True False False False False False
-
-evilMage :: String -> Character
-evilMage na = makeEnemy na 50 100 30
---False True False False False False
---False False True False True False
+evilMage :: String -> (ClassSkills, Character)
+evilMage na = (skills, char)
+    where
+        skills = ClassSkills na False True False False False False False False True False True False
+        char = makeEnemy na 50 100 30
