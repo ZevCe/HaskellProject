@@ -4,67 +4,16 @@
     padding: 0;
 }
 
-/* Test Borders */
-    /* .enemy-display,
-    .friend-display,
-    .menu,
-    .combat-log,
-    .character,
-    .stat-block,
-    .portrait {
-        border: 2px, solid, black;
-    }
+/* Begin test stuff */
 
-    .enemy-display, 
-    .friend-display {
-        border-color: red;
-    }
 
-    .menu,
-    .stat-block {
-        border-color: green;
-    }
-
-    .combat-log p {
-        border: 1px, solid, black;
-    } */
-
-.combat-log,
-.portrait {
-    background-color: floralwhite;
-    border-color: purple;
-}
-
-.enemy-display,
-.friend-display,
-.menu,
-.combat-log,
-.character,
-.stat-block,
-.portrait {
-    background-color: gray;
-}
-
-.enemy-display {
-    background-color: red;
-}
-.friend-display {
-    background-color: green;
-}
-.menu {
-    background-color: mediumvioletred;
-}
-.combat-log {
-    background-color: cornflowerblue;
-}
-/* End Test Borders */
+/* End test stuff */
 
 /******************
  * Basic elements *
  ******************/
 body {
     font-size: 15px;
-    background-color: gray;
 }
 
 button {
@@ -77,7 +26,7 @@ button {
  **************/
 
 .board {
-    /* border: 2px, solid, black; */
+    border: 2px, solid, white;
     width: 800px;
     height: 600px;
     margin: 20px;
@@ -89,7 +38,11 @@ button {
 .enemy-display,
 .friend-display {
     width: 600px;
-    height: 200px;
+    height: 199px;
+    margin-bottom: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
 }
 
 .menu {
@@ -104,10 +57,10 @@ button {
 } */
 
 .enemy-display,
-.friend-display {
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
+.friend-display,
+.menu,
+.combat-log {
+    background-color: gray;
 }
 
 /**************
@@ -149,7 +102,8 @@ button {
  **************/
 
  .combat-log {
-    width: 200px;
+    width: 199px;
+    margin-left: 1px;
     height: 600px;
     /* border-left: 1px, solid, black; */
     overflow: scroll;

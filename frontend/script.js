@@ -99,8 +99,8 @@ async function loadEncounter() {
         testMessage2.textContent = "ERROR";
     }
 
-    getTeams(battleState.turnOrder);
-    displayBoard(battleState.turnOrder);
+    // displayBoard(battleState.turnOrder);
+    displayBoard(battleState.initTurnOrderurnOrder);
 }
 
 async function testAction() {
