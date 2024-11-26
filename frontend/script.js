@@ -8,6 +8,13 @@ let friends = null;
  * FUNCTIONS *
  *************/
 
+function appendToCombatLog(toAppend) {
+    const combatLogDiv = document.querySelector(".combat-log");
+    const par = document.createElement("p");
+    par.innerText = toAppend
+    combatLogDiv.insertBefore(par, combatLogDiv.firstChild);
+}
+
 function getTeams(turnOrder) {
     enemies = [];
     friends = [];
@@ -35,8 +42,10 @@ function createStatBlock(character = null) {
     // TODO: Actually put a portrait in
     // Portrait
     const portraitDiv = document.createElement("div");
-    portraitDiv.classList.add("portrait")
-    const portraitSource = undefined;
+    portraitDiv.classList.add("portrait");
+    const portraitSource = "images/temp.png";
+    portraitDiv.innerHTML = 
+    `<img src=${portraitSource}></img>`;
 
     // Stat Block
     const statBlockDiv = document.createElement("div");
@@ -51,6 +60,7 @@ function createStatBlock(character = null) {
     characterDiv.appendChild(portraitDiv);
     characterDiv.appendChild(statBlockDiv);
 
+    // Place on correct side
     if (character.team == "Friend") {
         const friendDiv = document.querySelector(".friend-display");
         friendDiv.appendChild(characterDiv);
@@ -60,7 +70,7 @@ function createStatBlock(character = null) {
     }
 }
 
-function displayBoard(characters = null) {
+function displayBoard() {
     // Clear board
     const friendDiv = document.querySelector(".friend-display");
     friendDiv.innerHTML = "";
@@ -68,17 +78,36 @@ function displayBoard(characters = null) {
     enemyDiv.innerHTML = "";
 
     // Create each characters stat block and add to display
+    characters = battleState.initTurnOrder;
     characters.forEach(char => {
         createStatBlock(char);
     });
 }
 
+function getNextTurn() {
+    const currentAttacker = battleState.initTurnOrder[0];
+
+    appendToCombatLog(`${currentAttacker.name} gets ready to attack!`);
+
+    if (currentAttacker.team == "Friend") {
+        appendToCombatLog("DEBUG: Friend");
+        getMenu(currentAttacker);
+    } else {
+        appendToCombatLog("DEBUG: Enemy");
+    }
+}
+
+function getMenu(character) {
+    appendToCombatLog(`DEBUG: Printing out ${character.name} menu`);
+    // TODO: KMS
+}
 
 /*************
  * API CALLS *
  *************/
-async function loadEncounter() {
-    console.log("attempting to load encounter 1");
+async function loadEncounter(encounterName) {
+    console.log(`Attempting to load encounter ${encounterName}`);
+    appendToCombatLog(`Loading ${encounterName}`);
     const url = "http://localhost:3000/loadEncounter/1";
 
     try {
@@ -88,6 +117,7 @@ async function loadEncounter() {
 
             //get our response
             console.log("Fetch sucessful, returned JSON: ");
+            appendToCombatLog(`Encounter ${encounterName} loaded`);
             console.log(battleState);
         }
         else {
@@ -99,8 +129,8 @@ async function loadEncounter() {
         testMessage2.textContent = "ERROR";
     }
 
-    // displayBoard(battleState.turnOrder);
-    displayBoard(battleState.initTurnOrderurnOrder);
+    displayBoard();
+    getNextTurn();
 }
 
 async function testAction() {

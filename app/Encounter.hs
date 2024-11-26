@@ -26,7 +26,7 @@ instance ToJSON ClassSkills
 
 data EncounterInfo = 
     EncounterInfo  { classes :: [ClassSkills],
-                     initTurnOrderurnOrder :: [Character]}
+                     initTurnOrder :: [Character]}
                      deriving(Generic)
 
 instance FromJSON EncounterInfo

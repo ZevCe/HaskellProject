@@ -17,6 +17,9 @@ main = scotty 3000 $ do
     get "/style.css" $ do
       file "./frontend/style.css"
 
+    get "/images/temp.png" $ do
+      file "./frontend/images/temp.png"
+
     --get request for loading an encounter  
     get "/loadEncounter/:num" $ do
       numString <- pathParam "num"
