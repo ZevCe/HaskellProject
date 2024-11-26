@@ -1,37 +1,39 @@
-async function test() {
+let battleState = null;
 
-    //In all cases going forward you will make a fetch request to /loadEncounter to generate the initial list of characters
-    //this is purely for testing this one time, because I couldn't be bothered to take the 30 seconds needed to refactor encounter
-    let sampleRequest = {
-        action : ["HeP","james"],
-        turnOrder : [
-            {
-                name : "zev",
-                team : "Friend",
-                items : {numHealthPotions : 1, numManaPotions : 0, numThrowingKnives : 0, numMagicalSeals : 0, numWebTraps : 0, numHastePotions : 0},
-                stamina : 1000000,
-                maxStamina : 0,
-                ki : 100000,
-                maxKi : 0,
-                speed : 100000,
-                statuses : []
-            },
-            {
-                name : "james",
-                team : "Friend",
-                items : {numHealthPotions : 0, numManaPotions : 0, numThrowingKnives : 0, numMagicalSeals : 0, numWebTraps : 0, numHastePotions : 0},
-                stamina : 5,
-                maxStamina : 25,
-                ki : 1,
-                maxKi : 1,
-                speed : 0,
-                statuses : []
-            }
-        ]
+async function loadEncounter() {
+
+    console.log("attempting to load encounter 1");
+    const url = "http://localhost:3000/loadEncounter/1";
+
+    try {
+        const response = await fetch(url);
+        if (response.status == 200) {
+            battleState = await response.json();
+
+            //get our response
+            console.log("Fetch sucessful, returned JSON: ");
+            console.log(battleState)
+        }
+        else {
+            console.log("response.status error: " + response.status);
+        }
+    }
+    catch (error) {
+        console.error("ERROR! ", error);
+        testMessage2.textContent = "ERROR";
+    }
+}
+
+
+async function testAction() {
+
+    let request = {
+        action : ["SA","3","Rat"],
+        turnOrder : (battleState.turnOrder)
     }
 
     console.log("Sending JSON: ");
-    console.log(sampleRequest);
+    console.log(request);
 
     const exportUrl = "http://localhost:3000/roundInfo";
 
@@ -41,14 +43,14 @@ async function test() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(sampleRequest)
+            body: JSON.stringify(request)
         });
         if (response.status == 200) {
 
             //get our response
             console.log("receiving JSON: ");
-            const obj = await response.json();
-            console.log(obj);
+            battleState = await response.json();
+            console.log(battleState);
         }
         else {
             console.log("response.status error: " + response.status);

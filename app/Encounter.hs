@@ -1,109 +1,92 @@
-{-module Encounter where
+module Encounter where
 
 import Character
-import Class
-import Item
 
-getEncounterTutorial :: [Class]
-getEncounterTutorial = [getGod, getRat]
+encounterTutorial :: [Character]
+encounterTutorial = getTurnOrder [getGod, getRat]
 
 -- Warrior, Cleric
 -- Haskeleton, Rat
-getBasicEncounter1 :: [Class]
-getBasicEncounter1 = [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
+encounter1 :: [Character]
+encounter1 = getTurnOrder [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
 
 --1x warrior, 1x mage, 1x cleric, 1x rogue
 --2x rogue, 2x mage
-getBasicEncounter2 :: [Class]
-getBasicEncounter2 = [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein", evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
+encounter2 :: [Character]
+encounter2 = getTurnOrder
+    [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein", 
+    evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
+
+getEncounter :: String -> [Character]
+getEncounter input
+     | input == "1" = encounter1
+     | input == "2" = encounter2
+     | otherwise = encounterTutorial
 
 -- Doesn't take into account invalid names, maybe a ST fix later
--- Class
--- makeCharacter Stamina Ki Speed
---  ItemList Health, Mana, Knives, Seals, Web, Haste
---  "Name" "Faction"
+-- leaving this block below here for reference in case james forgot which chars had which abilities
 --  stam ki heal rally invigorate demoralize
 --  Intimidate shield amplify dampen curse barrier
 
+{- new and easier way to make chars, found over in Character.hs 
+makeFriend :: String -> ItemList -> Int -> Int -> Int -> Character
+makeFriend na ite sta k spd =
+    Character na "Friend" ite sta sta k k spd []
+
+makeEnemy :: String -> Int -> Int -> Int -> Character
+makeEnemy na sta k spd =
+    Character na "Enemy" (ItemList 0 0 0 0 0 0) sta sta k k spd []
+-}
 
 --------------
 --  Allies  --
 --------------
 
-getGod :: Class
-getGod = Class
-            (makeCharacter 100 100 100)
-            (ItemList 1 1 1 1 1 1)
-            "God" "Friend"
-            True True True True True True
-            True True True True True True
+getGod :: Character
+getGod = makeFriend "God" (ItemList 1 1 1 1 1 1) 100 100 100
+                        
+getWarrior :: String -> Character
+getWarrior na = makeFriend na (ItemList 2 1 0 0 1 1) 100 30 60
+--True False False True False True
+--False True False False False False
 
-getWarrior :: String -> Class
-getWarrior tname = Class
-                    (makeCharacter 100 30 60)
-                    (ItemList 2 1 0 0 1 1)
-                    tname "Friend"
-                    True False False True False True
-                    False True False False False False
+                    
+getCleric :: String -> Character
+getCleric na = makeFriend na (ItemList 1 3 0 2 0 0) 60 100 40    
+--False True True False False False             
+--False False False True False True
 
-getCleric :: String -> Class
-getCleric tname = Class
-                    (makeCharacter 60 100 40)
-                    (ItemList 1 3 0 2 0 0)
-                    tname "Friend"
-                    False True True False False False
-                    False False False True False True
+getRogue :: String -> Character
+getRogue na = makeFriend na (ItemList 2 1 2 0 1 0) 80 40 100
+--True False False False True False
+--True False False False False False
 
-getRogue :: String -> Class
-getRogue tname = Class
-                    (makeCharacter 80 40 100)
-                    (ItemList 2 1 2 0 1 0)
-                    tname "Friend"
-                    True False False False True False
-                    True False False False False False
-
-getMage :: String -> Class
-getMage tname = Class
-                    (makeCharacter 50 100 30)
-                    (ItemList 1 2 0 1 0 0)
-                    tname "Friend"
-                    False True False False False False
-                    False False True False True False
+getMage :: String -> Character
+getMage na = makeFriend na (ItemList 1 2 0 1 0 0) 50 100 30
+--False True False False False False
+--False False True False True False
 
 ---------------
 --  Enemies  --
 ---------------
 
-getRat :: Class
-getRat = Class
-            (makeCharacter 10 10 10)
-            (ItemList 0 0 0 0 0 0)
-            "Rat" "Enemy"
-            True False False False False False
-            False False False False False False
+getRat :: Character
+getRat = makeEnemy "Rat" 10 10 10
+--True False False False False False
+--False False False False False False
 
-getHaskeleton :: Class
-getHaskeleton = Class
-                (makeCharacter 50 20 50)
-                (ItemList 0 0 1 0 0 0)
-                "Haskeleton" "Enemy"
-                True False False False False False                
-                True False False False False False
+getHaskeleton :: Character
+getHaskeleton = makeEnemy "Haskeleton" 50 20 50
+--True False False False False False                
+--True False False False False False
 
 
-evilRogue :: String -> Class
-evilRogue tname = Class
-                    (makeCharacter 80 40 100)
-                    (ItemList 2 1 2 0 1 0)
-                    tname "Enemy"
-                    True False False False True False
-                    True False False False False False
+evilRogue :: String -> Character
+evilRogue na = makeEnemy na 80 40 100
+--True False False False True False
+--True False False False False False
 
-evilMage :: String -> Class
-evilMage tname = Class
-                    (makeCharacter 50 100 30)
-                    (ItemList 1 2 0 1 0 0)
-                    tname "Enemy"
-                    False True False False False False
-                    False False True False True False
--}
+evilMage :: String -> Character
+evilMage na = makeEnemy na 50 100 30
+--False True False False False False
+--False False True False True False

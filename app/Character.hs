@@ -6,7 +6,6 @@ import Data.Ord
 import GHC.Generics
 import Data.Aeson
 
-
 data Character  =
     Character { name       :: String,
                 team       :: String,
@@ -81,13 +80,14 @@ enemyTeam = filter (\c -> team c == "Enemy")
 friendTeam :: [Character] -> [Character]
 friendTeam = filter (\c -> team c == "Friend")
 
--- --after we re-organize everyone by speed we need to re-iterate back through
--- --whose turn it currently is
--- fixTurnOrder :: Class -> [Class] -> [Class]
--- fixTurnOrder turnChar (char:chars) =
---     if turnChar == char then chars ++ [char]
---     else fixTurnOrder turnChar (chars ++ [char])
--- fixTurnOrder _ _ = undefined
+--after we re-organize everyone by speed we need to re-iterate back through
+--whose turn it currently is
+fixTurnOrder :: Character -> [Character] -> [Character]
+fixTurnOrder turnChar (char:chars) =
+    if turnChar == char then chars ++ [char]
+    else fixTurnOrder turnChar (chars ++ [char])
+
+fixTurnOrder _ _ = undefined
 
 --quicker way of making a new character
 makeFriend :: String -> ItemList -> Int -> Int -> Int -> Character
@@ -121,16 +121,14 @@ modifyStatuses char newStatuses = Character (name char) (team char) (items char)
 --preferred functions for adding/removing statuses, only need to use modifyStatuses externally when status comes with a stat buff (i.e. items)
 --with how game is currently setup only one status ever gets added at a time, but multiple statuses can be removed at once
 addStatus :: Character -> String -> Character
-addStatus char status =
-    if status `notElem` statuses char
-        then modifyStatuses char (status : statuses char)
-    else char
+addStatus char status
+     | status `notElem` statuses char = modifyStatuses char (status : statuses char)
+     | otherwise = char
 
 addStatusWithEffect :: Character -> String -> Character -> Character
-addStatusWithEffect char status affectedChar = 
-    if status `notElem` statuses char
-        then modifyStatuses affectedChar (status : statuses char)
-    else char
+addStatusWithEffect char status affectedChar 
+     | status `notElem` statuses char = modifyStatuses affectedChar (status : statuses char)
+     | otherwise = char
 
 removeStatuses :: Character -> [String] -> Character
 removeStatuses char statusesToRemove = modifyStatuses char $ filter (`notElem` statusesToRemove) (statuses char)

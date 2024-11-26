@@ -15,7 +15,7 @@ import Character
 --no invalid inputs (all levels are correct levels, all comand names pattern match correctly etc.)
 performAction :: [String] -> [Character] -> [Character]
 
---use health potion
+--health potion (restores up to 20 stamina)
 performAction ("HeP":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
     where
         modifyTarget target = modifyStamina target $ min 20 $ maxStamina target - stamina target
@@ -24,7 +24,7 @@ performAction ("HeP":targetName:_) chars@(user:_) = useItem targetName chars mod
             (numHealthPotions (items user) - 1) (numManaPotions $ items user) (numThrowingKnives $ items user)
             (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
 
---use mana potion
+--mana potion (restores up to 20 ki)
 performAction ("MP":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
     where
         modifyTarget target = modifyKi target $ min 20 $ maxKi target - ki target
@@ -33,7 +33,7 @@ performAction ("MP":targetName:_) chars@(user:_) = useItem targetName chars modi
             (numHealthPotions $ items user) (numManaPotions (items user) - 1) (numThrowingKnives $ items user)
             (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
 
---use throwing knives
+--throwing knives (deals 20 stamina damage)
 performAction ("TK":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
     where
         modifyTarget target = modifyStamina target (-20)
@@ -42,7 +42,7 @@ performAction ("TK":targetName:_) chars@(user:_) = useItem targetName chars modi
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives (items user) - 1)
             (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
 
---use magial seal
+--use magial seal (deals 20 ki damage)
 performAction ("MS":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
     where
         modifyTarget target = modifyKi target (-20)
@@ -51,7 +51,7 @@ performAction ("MS":targetName:_) chars@(user:_) = useItem targetName chars modi
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user)
             (numMagicalSeals (items user) - 1) (numWebTraps $ items user) (numHastePotions $ items user)
 
---use web trap
+--use web trap (halves target's speed)
 performAction ("WT":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
     where
         modifyTarget target = addStatusWithEffect target "webTrap" slowedTarget
@@ -61,7 +61,7 @@ performAction ("WT":targetName:_) chars@(user:_) = useItem targetName chars modi
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user)
             (numMagicalSeals $ items user) (numWebTraps (items user) - 1) (numHastePotions $ items user)
 
---use haste potion
+--use haste potion (doubles target's speed)
 performAction ("HaP":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
     where
         modifyTarget target = addStatusWithEffect target "hastePotion" hastedTarget
@@ -71,47 +71,58 @@ performAction ("HaP":targetName:_) chars@(user:_) = useItem targetName chars mod
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user)
             (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions (items user) - 1)
 
---use stamina attack
+--stamina attack
+--single target attacks can have levels 0-3
+--group attacks can have levels 1-2
 performAction ("SA":level:targetName:_) chars = attackTarget [level, targetName] chars modifyStamina maxStamina userStatuses targetStatuses
     where
         userStatuses = ("invigorate", "demoralize")
         targetStatuses = ("intimidate","shield")
 
---use ki attack
+--ki attack
+--single target attacks can have levels 0-3
+--group attacks can have levels 1-2
 performAction ("KA":level:targetName:_) chars = attackTarget [level, targetName] chars modifyKi maxKi userStatuses targetStatuses
     where
         userStatuses = ("amplify", "dampen")
         targetStatuses = ("curse", "barrier")
 
---use heal
+--heal
+--single target restores can have levels 1-3
+--group restores can have levels 1-2
 performAction ("Hl":level:targetName:_) chars = restoreTarget [level, targetName] chars modifyKi maxKi ki
 
---use rally
+--rally
+--single target restores can have levels 1-3
+--group restores can have levels 1-2
 performAction ("Rly":level:targetName:_) chars = restoreTarget [level, targetName] chars modifyStamina maxStamina stamina
 
---use invigorate (target deals double damage on next stamina attack)
+--invigorate (target deals double damage on next stamina attack)
 performAction ("Invig":targetName:_) chars = statusTarget targetName chars modifyStamina "invigorate"
 
---use demoralize (deals half damage on next stamina attack)
+--demoralize (deals half damage on next stamina attack)
 performAction ("Demor":targetName:_) chars = statusTarget targetName chars modifyStamina "demoralize"
 
---use intimidate (takes double damage from next stamina attack)
+--intimidate (takes double damage from next stamina attack)
 performAction ("Intim":targetName:_) chars = statusTarget targetName chars modifyStamina "intimidate"
 
---use shield (takes half damage from next stamina attack)
+--shield (takes half damage from next stamina attack)
 performAction ("Shld":targetName:_) chars = statusTarget targetName chars modifyStamina "shield"
 
---use amplify (deals double damage on next ki attack)
+--amplify (deals double damage on next ki attack)
 performAction ("Amp":targetName:_) chars = statusTarget targetName chars modifyKi "amplify"
 
---use dampen (deals half damage on next ki attack)
+--dampen (deals half damage on next ki attack)
 performAction ("Damp":targetName:_) chars = statusTarget targetName chars modifyKi "dampen"
 
---use curse (takes double damage from next ki attack)
+--curse (takes double damage from next ki attack)
 performAction ("Crs":targetName:_) chars = statusTarget targetName chars modifyKi "curse"
 
---use barrier (takes half damage from next ki attack)
+--barrier (takes half damage from next ki attack)
 performAction ("Brr":targetName:_) chars = statusTarget targetName chars modifyKi "barrier"
+
+--determine enemies move, will impliment once we have more front end
+performAction ("Ea":_) _ = undefined
 
 performAction _ _ = undefined
 
@@ -133,7 +144,6 @@ attackTarget (level:targetName:_)
 attackTarget _ = undefined
 
 --generic function for using single target attacks
---levels 0-3
 attackSingle :: [String] -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> [Character]
 attackSingle (levelString:targetName:_) chars@(user:_) modifyStat maxStat userStatuses targetStatuses = returnUpdatedChars modifiedUser [target] modifyTarget chars
     where
@@ -166,7 +176,6 @@ attackSingle (levelString:targetName:_) chars@(user:_) modifyStat maxStat userSt
 attackSingle _ _ _ _ _ _ = undefined
 
 --generic function for group attacks
---valid levels are 1-2
 attackGroup :: String -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> [Character]
 attackGroup levelString chars@(user:_) modifyStat maxStat userStatuses targetStatuses = returnUpdatedChars modifiedUser targets modifyTarget chars
     where
@@ -272,10 +281,12 @@ statusGroup _ _ _ _ = undefined
 
 --helper function for returning results from our group target generic functions
 returnUpdatedChars :: Character -> [Character] -> (Character -> Character) -> [Character] -> [Character]
-returnUpdatedChars modifiedUser targets modifyTarget chars
-     | modifiedUser `elem` targets = replaceChars chars (modifyTarget modifiedUser : [modifyTarget curTar | curTar <- reducedTargets])
-     | otherwise = replaceChars chars (modifiedUser : [modifyTarget curTar | curTar <- targets])
+returnUpdatedChars modifiedUser targets modifyTarget chars = fixTurnOrder modifiedUser result
     where
+        result 
+             | modifiedUser `elem` targets = replaceChars chars (modifyTarget modifiedUser : [modifyTarget curTar | curTar <- reducedTargets])
+             | otherwise = replaceChars chars (modifiedUser : [modifyTarget curTar | curTar <- targets])
+
         reducedTargets = filter (/= modifiedUser) targets
 
         --replace characters from the old list with characters from the new list
