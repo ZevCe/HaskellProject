@@ -57,7 +57,7 @@ instance ToJSON ItemList
 --action can either be the action for the back end to perform
 --or the log of updates to display to the player for the front end
 --incoming and outgoing packets may eventually be different, just for initial testing they are the same
-data NetworkPacket = 
+data NetworkPacket =
     NetworkPacket {
         action :: [String],
         turnOrder  :: [Character]
@@ -69,14 +69,6 @@ instance ToJSON NetworkPacket
 --returns the list of characters sorted by speed (descending)
 getTurnOrder :: [Character] -> [Character]
 getTurnOrder = sortBy (comparing Down)
-
---replace characters from the old list with characters from the new list
---filtering out all the dead characters then re-organizing them into turn order
-updateCharList :: [Character] -> [Character] -> [Character]
-updateCharList oldList updatedChars = getTurnOrder aliveChars
-    where
-        unaffectedChars = oldList \\ updatedChars
-        aliveChars = filter (\c -> ki  c > 0 && stamina c > 0) (updatedChars ++ unaffectedChars)
 
 --finding a target amongst a list of Characters
 getTarget :: [Character] -> String -> Character
@@ -125,3 +117,20 @@ modifySpeed char amt =
 
 modifyStatuses :: Character -> [String] -> Character
 modifyStatuses char newStatuses = Character (name char) (team char) (items char) (stamina char) (maxStamina char) (ki char) (maxKi char) (speed char) newStatuses
+
+--preferred functions for adding/removing statuses, only need to use modifyStatuses externally when status comes with a stat buff (i.e. items)
+--with how game is currently setup only one status ever gets added at a time, but multiple statuses can be removed at once
+addStatus :: Character -> String -> Character
+addStatus char status =
+    if status `notElem` statuses char
+        then modifyStatuses char (status : statuses char)
+    else char
+
+addStatusWithEffect :: Character -> String -> Character -> Character
+addStatusWithEffect char status affectedChar = 
+    if status `notElem` statuses char
+        then modifyStatuses affectedChar (status : statuses char)
+    else char
+
+removeStatuses :: Character -> [String] -> Character
+removeStatuses char statusesToRemove = modifyStatuses char $ filter (`notElem` statusesToRemove) (statuses char)
