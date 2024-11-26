@@ -27,24 +27,26 @@
 
 .combat-log,
 .portrait {
+    background-color: gray;
     border-color: purple;
 }
 
 .combat-log p {
     border: 1px, solid, black;
-    margin: 20px;
 }
 /* End Test Borders */
-
 
 /******************
  * Basic elements *
  ******************/
+body {
+    font-size: 15px;
+}
+
 button {
     border: 1px, solid, black;
     padding: 10px;
 }
-
 
 /**************
  * Main Board *
@@ -60,27 +62,27 @@ button {
 }
 
 .enemy-display,
-.friend-display,
-.menu {
+.friend-display {
     width: 600px;
     height: 200px;
 }
+
+.menu {
+    width: 600px;
+    height: 200px;
+    /* border-top: 1px, solid, black; */
+}
+
+/* .enemy-display {
+    height: 200px;
+    border-bottom: 5px, solid, black;
+} */
 
 .enemy-display,
 .friend-display {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-}
-
-.combat-log {
-    width: 200px;
-    height: 600px;
-    overflow: scroll;
-}
-
-.combat-log::-webkit-scrollbar {
-    display: none;
 }
 
 /**************
@@ -92,8 +94,34 @@ button {
     height: 128px;
  }
 
+.character .portrait {
+    border: 1px, solid, black;
+}
+
  .character .portrait,
  .character .stat-block {
+    text-align: center;
     width: 64px;
     height: 64px;
+ }
+
+/**************
+ * COMBAT LOG *
+ **************/
+
+ .combat-log {
+    width: 200px;
+    height: 600px;
+    /* border-left: 1px, solid, black; */
+    overflow: scroll;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.combat-log::-webkit-scrollbar {
+    display: none;
+}
+
+ .combat-log p {
+    margin: 10px;
  }
