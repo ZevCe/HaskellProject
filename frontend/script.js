@@ -1,7 +1,6 @@
 let battleState = null;
 
 async function loadEncounter() {
-
     console.log("attempting to load encounter 1");
     const url = "http://localhost:3000/loadEncounter/1";
 

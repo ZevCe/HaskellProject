@@ -1,12 +1,89 @@
-#mainWindow{
-    display: flex;
-    flex-wrap: wrap;
+* {
+    margin: 0;
+    border: 0;
+    padding: 0;
 }
 
-.characterDisplay{
-    flex-basis: 50%;
+/* Test Borders */
+.enemy-display,
+.friend-display,
+.menu,
+.combat-log,
+.character {
+    border: 2px, solid, black;
 }
 
+.enemy-display, 
+.friend-display {
+    border-color: red;
+}
+
+.menu {
+    border-color: green;
+}
+
+.combat-log {
+    border-color: purple;
+}
+
+.combat-log p {
+    border: 1px, solid, black;
+    margin: 20px;
+}
+/* End Test Borders */
+
+
+/******************
+ * Basic elements *
+ ******************/
 button {
-    padding: 50px;
+    border: 1px, solid, black;
+    padding: 10px;
 }
+
+
+/**************
+ * Main Board *
+ **************/
+
+.board {
+    border: 2px, solid, black;
+    width: 800px;
+    height: 600px;
+    margin: 20px;
+    
+    display: flex;
+}
+
+.enemy-display,
+.friend-display,
+.menu {
+    width: 600px;
+    height: 200px;
+}
+
+.enemy-display,
+.friend-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.combat-log {
+    width: 200px;
+    height: 600px;
+    overflow: scroll;
+}
+
+.combat-log::-webkit-scrollbar {
+    display: none;
+}
+
+/**************
+ * Characters *
+ **************/
+
+ .character {
+    width: 64px;
+    height: 128px;
+ }
