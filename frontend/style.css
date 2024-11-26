@@ -5,6 +5,36 @@
 }
 
 /* Test Borders */
+    /* .enemy-display,
+    .friend-display,
+    .menu,
+    .combat-log,
+    .character,
+    .stat-block,
+    .portrait {
+        border: 2px, solid, black;
+    }
+
+    .enemy-display, 
+    .friend-display {
+        border-color: red;
+    }
+
+    .menu,
+    .stat-block {
+        border-color: green;
+    }
+
+    .combat-log p {
+        border: 1px, solid, black;
+    } */
+
+.combat-log,
+.portrait {
+    background-color: floralwhite;
+    border-color: purple;
+}
+
 .enemy-display,
 .friend-display,
 .menu,
@@ -12,27 +42,20 @@
 .character,
 .stat-block,
 .portrait {
-    border: 2px, solid, black;
-}
-
-.enemy-display, 
-.friend-display {
-    border-color: red;
-}
-
-.menu,
-.stat-block {
-    border-color: green;
-}
-
-.combat-log,
-.portrait {
     background-color: gray;
-    border-color: purple;
 }
 
-.combat-log p {
-    border: 1px, solid, black;
+.enemy-display {
+    background-color: red;
+}
+.friend-display {
+    background-color: green;
+}
+.menu {
+    background-color: mediumvioletred;
+}
+.combat-log {
+    background-color: cornflowerblue;
 }
 /* End Test Borders */
 
@@ -41,6 +64,7 @@
  ******************/
 body {
     font-size: 15px;
+    background-color: gray;
 }
 
 button {
@@ -53,11 +77,12 @@ button {
  **************/
 
 .board {
-    border: 2px, solid, black;
+    /* border: 2px, solid, black; */
     width: 800px;
     height: 600px;
     margin: 20px;
-    
+    background-color: black;
+
     display: flex;
 }
 
@@ -104,6 +129,20 @@ button {
     width: 64px;
     height: 64px;
  }
+
+ .character .stamina {
+    color: red;
+ }
+
+ .character .ki {
+    color: blue;
+ }
+
+ .character .speed {
+    color: yellow;
+ }
+
+
 
 /**************
  * COMBAT LOG *
