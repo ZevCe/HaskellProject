@@ -53,14 +53,33 @@ data ItemList =
 instance FromJSON ItemList
 instance ToJSON ItemList
 
+data ClassSkills = 
+    ClassSkills { id           :: String,
+                  stamAttack   :: Bool,
+                  kiAttack     :: Bool,
+                  heal         :: Bool,
+                  rally        :: Bool,
+                  invigorate   :: Bool,
+                  demoralize   :: Bool,
+                  intimidate   :: Bool,
+                  shield       :: Bool,
+                  amplify      :: Bool,
+                  dampen       :: Bool,
+                  curse        :: Bool,
+                  barrier      :: Bool}
+                  deriving(Generic, Show)
+
+instance FromJSON ClassSkills
+instance ToJSON ClassSkills
+
 --action can either be the action for the back end to perform
 --or the log of updates to display to the player for the front end
 --incoming and outgoing packets may eventually be different, just for initial testing they are the same
 data NetworkPacket =
-    NetworkPacket {
-        action :: [String],
-        turnOrder  :: [Character]
-    }
+    TurnPacket { action     :: [String],
+                 turnOrder  :: [Character]}
+    |LoadPacket { classes   :: [ClassSkills],
+                  turnOrder :: [Character]}
     deriving(Generic, Show)
 instance FromJSON NetworkPacket
 instance ToJSON NetworkPacket

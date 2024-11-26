@@ -31,4 +31,4 @@ main = scotty 3000 $ do
         info <- jsonData :: ActionM NetworkPacket
         liftIO $ print info
         let newInfo = performAction (action info) (turnOrder info)
-        json (NetworkPacket [] newInfo)
+        json (TurnPacket [] newInfo)

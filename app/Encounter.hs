@@ -5,57 +5,30 @@ import Character
 import GHC.Generics
 import Data.Aeson
 
-data ClassSkills = 
-    ClassSkills { name         :: String,
-                  stamAttack   :: Bool,
-                  kiAttack     :: Bool,
-                  heal         :: Bool,
-                  rally        :: Bool,
-                  invigorate   :: Bool,
-                  demoralize   :: Bool,
-                  intimidate   :: Bool,
-                  shield       :: Bool,
-                  amplify      :: Bool,
-                  dampen       :: Bool,
-                  curse        :: Bool,
-                  barrier      :: Bool}
-                  deriving(Generic)
-
-instance FromJSON ClassSkills
-instance ToJSON ClassSkills
-
-data EncounterInfo = 
-    EncounterInfo  { classes :: [ClassSkills],
-                     initTurnOrder :: [Character]}
-                     deriving(Generic)
-
-instance FromJSON EncounterInfo
-instance ToJSON EncounterInfo    
-
 --helper function for turning list of characters into encounter info datatype
-parseToEncounterInfo :: [(ClassSkills, Character)] -> EncounterInfo
-parseToEncounterInfo fullInfo = EncounterInfo classSkills turnOrd
+parseToEncounterInfo :: [(ClassSkills, Character)] -> NetworkPacket
+parseToEncounterInfo fullInfo = LoadPacket classSkills turnOrd
     where 
         classSkills = [fst curChar | curChar <- fullInfo]
         turnOrd = getTurnOrder [snd curChar | curChar <- fullInfo]
 
-encounterTutorial :: EncounterInfo 
+encounterTutorial :: NetworkPacket
 encounterTutorial =  parseToEncounterInfo [getGod, getRat]
 
 
 -- Warrior, Cleric
 -- Haskeleton, Rat
-encounter1 :: EncounterInfo
+encounter1 :: NetworkPacket
 encounter1 = parseToEncounterInfo [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
 
 --1x warrior, 1x mage, 1x cleric, 1x rogue
 --2x rogue, 2x mage
-encounter2 :: EncounterInfo
+encounter2 :: NetworkPacket
 encounter2 = parseToEncounterInfo
     [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein", 
     evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
 
-getEncounter :: String -> EncounterInfo
+getEncounter :: String -> NetworkPacket
 getEncounter input
      | input == "1" = encounter1
      | input == "2" = encounter2
