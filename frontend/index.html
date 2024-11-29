@@ -8,10 +8,10 @@
     <title>Test</title>
 </head>
 
-<body>
-    <button onclick="loadEncounter(1);">Load Encounter</button>
+<body onload="loadEncounter(1)">
+    <!-- <button onclick="loadEncounter(1);">Load Encounter</button>
 
-    <button onclick="testAction();">Test Action</button>
+    <button onclick="testAction();">Test Action</button> -->
 
     <div class="board">
         <div id="left-side">
@@ -31,8 +31,14 @@
                 <div class="main-menu">
                     
                 </div>
-                <!--Menu for showing submenu. Skill levels, items, etc.-->
+
+                <!--Menu for showing submenu for items/single or group-->
                 <div class="sub-menu">
+
+                </div>
+
+                <!--Menu for showing attack levels and cost-->
+                <div class="attack-menu">
 
                 </div>
             </div>
@@ -44,7 +50,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="turn-order">
             
     </div>

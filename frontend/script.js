@@ -1,5 +1,5 @@
 // CONSTANTS
-const stamMoves = ["stamAttack", 
+const STAM_MOVES = ["stamAttack", 
                     "rally", 
                     "invigorate", 
                     "demoralize", 
@@ -155,8 +155,118 @@ function getCharacters() {
     // console.log(CharacterMenus);
 }
 
-function getSingleOrGroup(move) {
+function getSpellCost(move, type, level) {
+    if (type == "single") {
+        return Math.abs(Math.min((5 + (-15) * level), 0));
+    } else {
+        return 30 * level;
+    }
+}
 
+function isValidAttack(cost, costType) {
+    let attackerResources = 
+        costType == "ki" ? CurrentAttacker.ki : CurrentAttacker.stamina;
+    
+    if (attackerResources > cost) {
+        return true;
+    }
+
+    return false;
+}
+
+function getBasicAttack(move, type) {
+    let costType = move == "kiAttack" ? "ki" : "stamina";
+    let cost1 = getSpellCost(move, type, 1);
+    let cost2 = getSpellCost(move, type, 2);
+    let cost3 = getSpellCost(move, type, 3);
+    const attackMenuDiv = document.querySelector(".attack-menu");
+    attackMenuDiv.innerHTML = "";
+
+    if (type == "single") {
+        const level0 = document.createElement("button");
+        level0.innerText = `Level 0 (0)`;
+        level0.addEventListener("click", () => {
+            appendToCombatLog(`DEBUG: Send level 0 ${type} ${move}`);
+        });
+        attackMenuDiv.appendChild(level0);
+        
+        if (!isValidAttack(cost1, costType)) { return; }
+
+        const level1 = document.createElement("button");
+        level1.innerText = `Level 1 (${cost1})`;
+        level1.addEventListener("click", () => {
+            appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+        });
+        attackMenuDiv.appendChild(level1);
+
+        if (!isValidAttack(cost2, costType)) { return; }
+
+        const level2 = document.createElement("button");
+        level2.innerText = `Level 2 (${cost2})`;
+        level2.addEventListener("click", () => {
+            appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+        });
+        attackMenuDiv.appendChild(level2);
+
+        if (!isValidAttack(cost3, costType)) { return; }
+
+        const level3 = document.createElement("button");
+        level3.innerText = `Level 3 (${cost3})`;
+        level3.addEventListener("click", () => {
+            appendToCombatLog(`DEBUG: Send level 3 ${type} ${move}`);
+        });
+        attackMenuDiv.appendChild(level3);
+
+        return;
+    }
+
+    if (!isValidAttack(cost1, costType)) { return; }
+
+    const level1 = document.createElement("button");
+    level1.innerText = `Level 1 (${cost1})`;
+    level1.addEventListener("click", () => {
+        appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+    });
+    attackMenuDiv.appendChild(level1);
+
+    if (!isValidAttack(cost2, costType)) { return; }
+
+    const level2 = document.createElement("button");
+    level2.innerText = `Level 2 (${cost2})`;
+    level2.addEventListener("click", () => {
+        appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+    });
+    attackMenuDiv.appendChild(level2);
+}
+
+function getSpells(move, type) {
+    let costType = "ki";
+    if (STAM_MOVES.includes(move)) {
+        costType = "stamina";
+    }
+
+    if (move == "kiAttack" || move == "stamAttack") {
+        getBasicAttack(move, type);
+    }
+}
+
+function getSingleOrGroup(move) {
+    const subMenu = document.querySelector(".sub-menu");
+    subMenu.innerHTML = "";
+
+    const single = document.createElement("button");
+    single.innerText = `Single`;
+    single.addEventListener("click", () => {
+        getSpells(move, "single");
+    });
+    subMenu.appendChild(single);
+
+    const group = document.createElement("button");
+    group.innerText = `Group`;
+    group.addEventListener("click", () => {
+        getSpells(move, "group");
+    });
+    subMenu.appendChild(group);
 }
 
 function getMenu() {
@@ -173,6 +283,11 @@ function getMenu() {
         // TODO: Make sta/ki attack first in menu
         moveButton.innerText = move;
         moveButton.addEventListener("click", () => {
+            const mainMenuButtons = document.querySelectorAll(".main-menu button");
+            mainMenuButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            moveButton.style.backgroundColor = "green";
             getSingleOrGroup(move);
         })
         mainMenu.appendChild(moveButton);
@@ -183,19 +298,20 @@ function getMenu() {
     items.classList.add("item");
     items.innerText = "Items";
     items.addEventListener("click", () => {
+        const mainMenuButtons = document.querySelectorAll(".main-menu button");
+        mainMenuButtons.forEach(button => {
+            button.style.backgroundColor = "rgb(212, 180, 180)";
+        });
+        items.style.backgroundColor = "green";
         getItems();
     });
     mainMenu.appendChild(items);
 }
 
 function getItems() {
-    appendToCombatLog(`DEBUG: Printing out ${CurrentAttacker.name} items`);
+    // appendToCombatLog(`DEBUG: Printing out ${CurrentAttacker.name} items`);
 
     let items = BattleState.turnOrder[0].items;
-
-    if (items.length == 0) {
-        return;
-    }
 
     const subMenu = document.querySelector(".sub-menu");
     subMenu.innerHTML = "";

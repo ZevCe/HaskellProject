@@ -126,7 +126,8 @@ button {
   }
 
   .main-menu,
-  .sub-menu {
+  .sub-menu,
+  .attack-menu {
     display: flex;
     flex-direction: column;
     height: 200px;
