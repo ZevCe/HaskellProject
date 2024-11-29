@@ -144,3 +144,11 @@ button {
     width: 125px;
     height: 30px;
   }
+
+/**************
+ * Turn Order *
+ **************/
+
+ #turn-order {
+    width: 200px;
+ }

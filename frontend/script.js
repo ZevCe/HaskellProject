@@ -1,3 +1,11 @@
+// CONSTANTS
+const stamMoves = ["stamAttack", 
+                    "rally", 
+                    "invigorate", 
+                    "demoralize", 
+                    "intimidate", 
+                    "shield"];
+
 // GLOBALS
 let BattleState = null;
 let CharacterMenus = new Map();
@@ -147,7 +155,7 @@ function getCharacters() {
     // console.log(CharacterMenus);
 }
 
-function getMoves(move) {
+function getSingleOrGroup(move) {
 
 }
 
@@ -165,7 +173,7 @@ function getMenu() {
         // TODO: Make sta/ki attack first in menu
         moveButton.innerText = move;
         moveButton.addEventListener("click", () => {
-            getMoves(move);
+            getSingleOrGroup(move);
         })
         mainMenu.appendChild(moveButton);
     });
@@ -253,6 +261,16 @@ function getItems() {
     }
 }
 
+function getTurnOrder() {
+    const turnOrderDiv = document.querySelector("#turn-order");
+    turnOrderDiv.innerHTML = `<p>Turn Order</p>`;
+
+    let turnOrder = "";
+    BattleState.turnOrder.forEach(char => {
+        turnOrderDiv.innerHTML += `<p>${char.name}</p>`;
+    });
+}
+
 /*************
  * API CALLS *
  *************/
@@ -282,6 +300,7 @@ async function loadEncounter(encounterName) {
 
     getCharacters();
     displayBoard();
+    getTurnOrder();
     getNextTurn();
 }
 
