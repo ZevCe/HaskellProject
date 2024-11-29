@@ -293,7 +293,8 @@ function getSpells(move, type) {
 
     // Basic attacks
     if (move == "kiAttack" || move == "stamAttack") {
-        getBasicAttack(move, type);
+        let moveCode = move == "kiAttack" ? "KA" : "SA";
+        getBasicAttack(moveCode , type);
         return;
     }
 
@@ -377,6 +378,42 @@ function getMenu() {
     mainMenu.appendChild(items);
 }
 
+function getItemEnemyTargets(move) {
+    const attackDiv = document.querySelector(".attack-menu");
+    attackDiv.innerHTML = "";
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
+
+    BattleState.turnOrder.forEach(char => {
+        if (char.team == "Enemy") {
+            const target = document.createElement("button");
+            target.innerText = `${char.name}`;
+            target.addEventListener("click", () => {
+                appendToCombatLog(`DEBUG: Send ${move} to ${char.name}`);
+            });
+            attackDiv.appendChild(target);
+        }
+    });
+}
+
+function getItemFriendlyTargets(move) {
+    const attackDiv = document.querySelector(".attack-menu");
+    attackDiv.innerHTML = "";
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
+
+    BattleState.turnOrder.forEach(char => {
+        if (char.team == "Friend") {
+            const target = document.createElement("button");
+            target.innerText = `${char.name}`;
+            target.addEventListener("click", () => {
+                appendToCombatLog(`DEBUG: Send ${move} on ${char.name}`);
+            });
+            attackDiv.appendChild(target);
+        }
+    });
+}
+
 function getItems() {
     // appendToCombatLog(`DEBUG: Printing out ${CurrentAttacker.name} items`);
 
@@ -384,13 +421,22 @@ function getItems() {
 
     const subMenu = document.querySelector(".sub-menu");
     subMenu.innerHTML = "";
+    const attackMenu = document.querySelector(".attack-menu");
+    attackMenu.innerHTML = "";
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
 
     if (items.numHastePotions != 0) {
         const potion = document.createElement("button");
         potion.classList.add("haste-potion");
         potion.innerText = `Haste Potion (${items.numHastePotions})`;
         potion.addEventListener("click", () => {
-            appendToCombatLog("Use Haste Potion");
+            const submenuButtons = document.querySelectorAll(".sub-menu button");
+            submenuButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            potion.style.backgroundColor = "green";
+            getItemFriendlyTargets("HaP");
         });
         subMenu.appendChild(potion);
     }
@@ -400,7 +446,12 @@ function getItems() {
         potion.classList.add("health-potion");
         potion.innerText = `Health Potion (${items.numHealthPotions})`;
         potion.addEventListener("click", () => {
-            appendToCombatLog("Use Health Potion");
+            const submenuButtons = document.querySelectorAll(".sub-menu button");
+            submenuButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            potion.style.backgroundColor = "green";
+            getItemFriendlyTargets("HeP");
         });
         subMenu.appendChild(potion);
     }
@@ -410,7 +461,12 @@ function getItems() {
         potion.classList.add("magical-seal");
         potion.innerText = `Magical Seal (${items.numMagicalSeals})`;
         potion.addEventListener("click", () => {
-            appendToCombatLog("Use Magical Seal");
+            const submenuButtons = document.querySelectorAll(".sub-menu button");
+            submenuButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            potion.style.backgroundColor = "green";
+            getItemFriendlyTargets("MS");
         });
         subMenu.appendChild(potion);
     }
@@ -420,7 +476,12 @@ function getItems() {
         potion.classList.add("mana-potion");
         potion.innerText = `Mana Potion (${items.numManaPotions})`;
         potion.addEventListener("click", () => {
-            appendToCombatLog("Use Mana Potion");
+            const submenuButtons = document.querySelectorAll(".sub-menu button");
+            submenuButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            potion.style.backgroundColor = "green";
+            getItemFriendlyTargets("MP");
         });
         subMenu.appendChild(potion);
     }
@@ -430,7 +491,12 @@ function getItems() {
         potion.classList.add("throwing-knife");
         potion.innerText = `Throwing Knife (${items.numThrowingKnives})`;
         potion.addEventListener("click", () => {
-            appendToCombatLog("Use Throwing Knife");
+            const submenuButtons = document.querySelectorAll(".sub-menu button");
+            submenuButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            potion.style.backgroundColor = "green";
+            getItemEnemyTargets("TK");
         });
         subMenu.appendChild(potion);
     }
@@ -440,7 +506,12 @@ function getItems() {
         potion.classList.add("web-trap");
         potion.innerText = `Web Trap (${items.numWebTraps})`;
         potion.addEventListener("click", () => {
-            appendToCombatLog("Use Web Trap");
+            getItemEnemyTargets("WT");
+            const submenuButtons = document.querySelectorAll(".sub-menu button");
+            submenuButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            potion.style.backgroundColor = "green";
         });
         subMenu.appendChild(potion);
     }
@@ -462,7 +533,7 @@ function getTurnOrder() {
 async function loadEncounter(encounterName) {
     console.log(`Attempting to load encounter ${encounterName}`);
     appendToCombatLog(`Loading ${encounterName}`);
-    const url = "http://localhost:3000/loadEncounter/1";
+    const url = `http://localhost:3000/loadEncounter/${encounterName}`;
 
     try {
         const response = await fetch(url);
