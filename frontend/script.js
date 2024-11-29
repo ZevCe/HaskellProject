@@ -174,6 +174,22 @@ function isValidAttack(cost, costType) {
     return false;
 }
 
+function getEnemyTargets(move, type) {
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
+
+    BattleState.turnOrder.forEach(char => {
+        if (char.team == "Enemy") {
+            const target = document.createElement("button");
+            target.innerText = `${char.name}`;
+            target.addEventListener("click", () => {
+                appendToCombatLog(`DEBUG: Send level 1 ${type} ${move} to ${char.name}`);
+            });
+            targetDiv.appendChild(target);
+        }
+    });
+}
+
 function getBasicAttack(move, type) {
     let costType = move == "kiAttack" ? "ki" : "stamina";
     let cost1 = getSpellCost(move, type, 1);
@@ -183,10 +199,20 @@ function getBasicAttack(move, type) {
     attackMenuDiv.innerHTML = "";
 
     if (type == "single") {
+        // const submenuButtons = document.querySelectorAll(".sub-menu button");
+        //     submenuButtons.forEach(button => {
+        //         button.style.backgroundColor = "rgb(212, 180, 180)";
+        // });
+
         const level0 = document.createElement("button");
         level0.innerText = `Level 0 (0)`;
         level0.addEventListener("click", () => {
-            appendToCombatLog(`DEBUG: Send level 0 ${type} ${move}`);
+            const attackButtons = document.querySelectorAll(".attack-menu button");
+            attackButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            level0.style.backgroundColor = "green";
+            getEnemyTargets(move, type);
         });
         attackMenuDiv.appendChild(level0);
         
@@ -195,7 +221,12 @@ function getBasicAttack(move, type) {
         const level1 = document.createElement("button");
         level1.innerText = `Level 1 (${cost1})`;
         level1.addEventListener("click", () => {
-            appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+            const attackButtons = document.querySelectorAll(".attack-menu button");
+            attackButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            level1.style.backgroundColor = "green";
+            getEnemyTargets(move, type);
         });
         attackMenuDiv.appendChild(level1);
 
@@ -204,7 +235,12 @@ function getBasicAttack(move, type) {
         const level2 = document.createElement("button");
         level2.innerText = `Level 2 (${cost2})`;
         level2.addEventListener("click", () => {
-            appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+            const attackButtons = document.querySelectorAll(".attack-menu button");
+            attackButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            level2.style.backgroundColor = "green";
+            getEnemyTargets(move, type);
         });
         attackMenuDiv.appendChild(level2);
 
@@ -213,7 +249,12 @@ function getBasicAttack(move, type) {
         const level3 = document.createElement("button");
         level3.innerText = `Level 3 (${cost3})`;
         level3.addEventListener("click", () => {
-            appendToCombatLog(`DEBUG: Send level 3 ${type} ${move}`);
+            const attackButtons = document.querySelectorAll(".attack-menu button");
+            attackButtons.forEach(button => {
+                button.style.backgroundColor = "rgb(212, 180, 180)";
+            });
+            level3.style.backgroundColor = "green";
+            getEnemyTargets(move, type);
         });
         attackMenuDiv.appendChild(level3);
 
@@ -240,30 +281,58 @@ function getBasicAttack(move, type) {
 }
 
 function getSpells(move, type) {
+    const attackMenu = document.querySelector(".attack-menu");
+    attackMenu.innerHTML = "";
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
+
     let costType = "ki";
     if (STAM_MOVES.includes(move)) {
         costType = "stamina";
     }
 
+    // Basic attacks
     if (move == "kiAttack" || move == "stamAttack") {
         getBasicAttack(move, type);
+        return;
+    }
+
+    // Ki attacks
+    if (costType = "ki") {
+
     }
 }
 
 function getSingleOrGroup(move) {
     const subMenu = document.querySelector(".sub-menu");
     subMenu.innerHTML = "";
+    const attackMenu = document.querySelector(".attack-menu");
+    attackMenu.innerHTML = "";
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
 
+    // Single target
     const single = document.createElement("button");
     single.innerText = `Single`;
     single.addEventListener("click", () => {
+        const submenuButtons = document.querySelectorAll(".sub-menu button");
+        submenuButtons.forEach(button => {
+            button.style.backgroundColor = "rgb(212, 180, 180)";
+        });
+        single.style.backgroundColor = "green";
         getSpells(move, "single");
     });
     subMenu.appendChild(single);
 
+    // Group attack
     const group = document.createElement("button");
     group.innerText = `Group`;
     group.addEventListener("click", () => {
+        const submenuButtons = document.querySelectorAll(".sub-menu button");
+        submenuButtons.forEach(button => {
+            button.style.backgroundColor = "rgb(212, 180, 180)";
+        });
+        group.style.backgroundColor = "green";
         getSpells(move, "group");
     });
     subMenu.appendChild(group);
