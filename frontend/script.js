@@ -1,8 +1,7 @@
 // GLOBALS
-let battleState = null;
-let enemies = null;
-let friends = null;
-
+let BattleState = null;
+let CharacterMenus = new Map();
+let CurrentAttacker = null;
 
 /*************
  * FUNCTIONS *
@@ -15,18 +14,18 @@ function appendToCombatLog(toAppend) {
     combatLogDiv.insertBefore(par, combatLogDiv.firstChild);
 }
 
-function getTeams(turnOrder) {
-    enemies = [];
-    friends = [];
+// function getTeams(turnOrder) {
+//     enemies = [];
+//     friends = [];
 
-    turnOrder.forEach(char => {
-        if (char.team == "Friend") {
-            friends.push(char);
-        } else {
-            enemies.push(char);
-        }
-    });
-}
+//     turnOrder.forEach(char => {
+//         if (char.team == "Friend") {
+//             friends.push(char);
+//         } else {
+//             enemies.push(char);
+//         }
+//     });
+// }
 
 function createStatBlock(character = null) {
     if (character == null) {
@@ -78,28 +77,180 @@ function displayBoard() {
     enemyDiv.innerHTML = "";
 
     // Create each characters stat block and add to display
-    characters = battleState.initTurnOrder;
+    let characters = BattleState.turnOrder;
     characters.forEach(char => {
         createStatBlock(char);
     });
 }
 
 function getNextTurn() {
-    const currentAttacker = battleState.initTurnOrder[0];
+    CurrentAttacker = BattleState.turnOrder[0];
 
-    appendToCombatLog(`${currentAttacker.name} gets ready to attack!`);
+    appendToCombatLog(`${CurrentAttacker.name} gets ready to attack!`);
 
-    if (currentAttacker.team == "Friend") {
+    if (CurrentAttacker.team == "Friend") {
         appendToCombatLog("DEBUG: Friend");
-        getMenu(currentAttacker);
+        getMenu();
     } else {
         appendToCombatLog("DEBUG: Enemy");
     }
 }
 
-function getMenu(character) {
-    appendToCombatLog(`DEBUG: Printing out ${character.name} menu`);
-    // TODO: KMS
+function getCharacters() {
+    let classInfo = BattleState.classes;
+    for (let i = 0; i < classInfo.length; i++) {
+        let menu = [];
+        let currentClass = classInfo[i];
+        
+        // There is definitely a better way to do this, but trying to figure
+        // out a more elegant way wasn't working.
+        // TODO: Refactor if time
+        if (currentClass.amplify) {
+            menu.push("amplify");
+        }
+        if (currentClass.barrier) {
+            menu.push("barrier");
+        }
+        if (currentClass.curse) {
+            menu.push("curse");
+        }
+        if (currentClass.dampen) {
+            menu.push("dampen");
+        }
+        if (currentClass.demoralize) {
+            menu.push("demoralize");
+        }
+        if (currentClass.heal) {
+            menu.push("heal");
+        }
+        if (currentClass.intimidate) {
+            menu.push("intimidate");
+        }
+        if (currentClass.invigorate) {
+            menu.push("invigorate");
+        }
+        if (currentClass.kiAttack) {
+            menu.push("kiAttack");
+        }
+        if (currentClass.rally) {
+            menu.push("rally");
+        }
+        if (currentClass.shield) {
+            menu.push("shield");
+        }
+        if (currentClass.stamAttack) {
+            menu.push("stamAttack");
+        }
+
+        CharacterMenus.set(`${classInfo[i].id}`, menu);
+    }
+    // console.log(CharacterMenus);
+}
+
+function getMoves(move) {
+
+}
+
+function getMenu() {
+    appendToCombatLog(`DEBUG: Printing out ${CurrentAttacker.name} menu`);
+
+    const mainMenu = document.querySelector(".main-menu");
+    mainMenu.innerHTML = "";
+    let moves = CharacterMenus.get(CurrentAttacker.name);
+
+    moves.forEach(move => {
+        let moveButton = document.createElement("button");
+        moveButton.classList.add(move);
+        // TODO: Change to make more readable
+        // TODO: Make sta/ki attack first in menu
+        moveButton.innerText = move;
+        moveButton.addEventListener("click", () => {
+            getMoves(move);
+        })
+        mainMenu.appendChild(moveButton);
+    });
+
+    // Items
+    const items = document.createElement("button");
+    items.classList.add("item");
+    items.innerText = "Items";
+    items.addEventListener("click", () => {
+        getItems();
+    });
+    mainMenu.appendChild(items);
+}
+
+function getItems() {
+    appendToCombatLog(`DEBUG: Printing out ${CurrentAttacker.name} items`);
+
+    let items = BattleState.turnOrder[0].items;
+
+    if (items.length == 0) {
+        return;
+    }
+
+    const subMenu = document.querySelector(".sub-menu");
+    subMenu.innerHTML = "";
+
+    if (items.numHastePotions != 0) {
+        const potion = document.createElement("button");
+        potion.classList.add("haste-potion");
+        potion.innerText = `Haste Potion (${items.numHastePotions})`;
+        potion.addEventListener("click", () => {
+            appendToCombatLog("Use Haste Potion");
+        });
+        subMenu.appendChild(potion);
+    }
+
+    if (items.numHealthPotions != 0) {
+        const potion = document.createElement("button");
+        potion.classList.add("health-potion");
+        potion.innerText = `Health Potion (${items.numHealthPotions})`;
+        potion.addEventListener("click", () => {
+            appendToCombatLog("Use Health Potion");
+        });
+        subMenu.appendChild(potion);
+    }
+
+    if (items.numMagicalSeals != 0) {
+        const potion = document.createElement("button");
+        potion.classList.add("magical-seal");
+        potion.innerText = `Magical Seal (${items.numMagicalSeals})`;
+        potion.addEventListener("click", () => {
+            appendToCombatLog("Use Magical Seal");
+        });
+        subMenu.appendChild(potion);
+    }
+
+    if (items.numManaPotions != 0) {
+        const potion = document.createElement("button");
+        potion.classList.add("mana-potion");
+        potion.innerText = `Mana Potion (${items.numManaPotions})`;
+        potion.addEventListener("click", () => {
+            appendToCombatLog("Use Mana Potion");
+        });
+        subMenu.appendChild(potion);
+    }
+
+    if (items.numThrowingKnives != 0) {
+        const potion = document.createElement("button");
+        potion.classList.add("throwing-knife");
+        potion.innerText = `Throwing Knife (${items.numThrowingKnives})`;
+        potion.addEventListener("click", () => {
+            appendToCombatLog("Use Throwing Knife");
+        });
+        subMenu.appendChild(potion);
+    }
+
+    if (items.numWebTraps != 0) {
+        const potion = document.createElement("button");
+        potion.classList.add("web-trap");
+        potion.innerText = `Web Trap (${items.numWebTraps})`;
+        potion.addEventListener("click", () => {
+            appendToCombatLog("Use Web Trap");
+        });
+        subMenu.appendChild(potion);
+    }
 }
 
 /*************
@@ -113,12 +264,12 @@ async function loadEncounter(encounterName) {
     try {
         const response = await fetch(url);
         if (response.status == 200) {
-            battleState = await response.json();
+            BattleState = await response.json();
 
             //get our response
             console.log("Fetch sucessful, returned JSON: ");
             appendToCombatLog(`Encounter ${encounterName} loaded`);
-            console.log(battleState);
+            console.log(BattleState);
         }
         else {
             console.log("response.status error: " + response.status);
@@ -129,6 +280,7 @@ async function loadEncounter(encounterName) {
         testMessage2.textContent = "ERROR";
     }
 
+    getCharacters();
     displayBoard();
     getNextTurn();
 }
@@ -137,7 +289,7 @@ async function testAction() {
 
     let request = {
         action : ["SA","3","Rat"],
-        turnOrder : (battleState.turnOrder)
+        turnOrder : (BattleState.turnOrder)
     }
 
     console.log("Sending JSON: ");
@@ -157,8 +309,8 @@ async function testAction() {
 
             //get our response
             console.log("receiving JSON: ");
-            battleState = await response.json();
-            console.log(battleState);
+            BattleState = await response.json();
+            console.log(BattleState);
         }
         else {
             console.log("response.status error: " + response.status);
