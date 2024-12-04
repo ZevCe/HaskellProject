@@ -99,15 +99,6 @@ enemyTeam = filter (\c -> team c == "Enemy")
 friendTeam :: [Character] -> [Character]
 friendTeam = filter (\c -> team c == "Friend")
 
---after we re-organize everyone by speed we need to re-iterate back through
---whose turn it currently is
-fixTurnOrder :: Character -> [Character] -> [Character]
-fixTurnOrder turnChar (char:chars) =
-    if turnChar == char then chars ++ [char]
-    else fixTurnOrder turnChar (chars ++ [char])
-
-fixTurnOrder _ _ = undefined
-
 --quicker way of making a new character
 makeFriend :: String -> ItemList -> Int -> Int -> Int -> Character
 makeFriend na ite sta k spd =

@@ -2,7 +2,7 @@
 
 --import Data.Aeson
 import Web.Scotty
-import Character 
+import Character
 import Actions (performAction)
 import Encounter
 
@@ -30,5 +30,4 @@ main = scotty 3000 $ do
     post "/roundInfo" $ do
         info <- jsonData :: ActionM NetworkPacket
         liftIO $ print info
-        let newInfo = performAction (action info) (turnOrder info)
-        json (TurnPacket [] newInfo)
+        json $ performAction (action info) (turnOrder info)

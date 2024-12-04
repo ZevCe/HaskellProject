@@ -1,14 +1,10 @@
-{-# LANGUAGE DeriveGeneric #-}
 module Encounter where
-
 import Character
-import GHC.Generics
-import Data.Aeson
 
 --helper function for turning list of characters into encounter info datatype
 parseToEncounterInfo :: [(ClassSkills, Character)] -> NetworkPacket
 parseToEncounterInfo fullInfo = LoadPacket classSkills turnOrd
-    where 
+    where
         classSkills = [fst curChar | curChar <- fullInfo]
         turnOrd = getTurnOrder [snd curChar | curChar <- fullInfo]
 
@@ -25,7 +21,7 @@ encounter1 = parseToEncounterInfo [getWarrior "Zev", getCleric "David", getHaske
 --2x rogue, 2x mage
 encounter2 :: NetworkPacket
 encounter2 = parseToEncounterInfo
-    [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein", 
+    [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein",
     evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
 
 getEncounter :: String -> NetworkPacket
@@ -58,18 +54,18 @@ getGod = (skills, char)
     where
         skills = ClassSkills "God" True True True True True True True True True True True True
         char = makeFriend "God" (ItemList 1 1 1 1 1 1) 100 100 100
-                        
+
 getWarrior :: String -> (ClassSkills, Character)
 getWarrior na = (skills, char)
     where
         skills = ClassSkills na True False False True False True False True False False False False
         char = makeFriend na (ItemList 2 1 0 0 1 1) 100 30 60
-                    
+
 getCleric :: String -> (ClassSkills, Character)
 getCleric na = (skills, char)
     where
-        skills = ClassSkills na False True True False False False False False False True False True 
-        char = makeFriend na (ItemList 1 3 0 2 0 0) 60 100 40    
+        skills = ClassSkills na False True True False False False False False False True False True
+        char = makeFriend na (ItemList 1 3 0 2 0 0) 60 100 40
 
 getRogue :: String -> (ClassSkills, Character)
 getRogue na = (skills, char)

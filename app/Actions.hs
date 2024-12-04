@@ -13,59 +13,89 @@ import Character
 --The action specified by the list of strings is valid
 --The character can perform the given action (i.e. has enough items/ki/stamina or the ability to use action in the first place)
 --no invalid inputs (all levels are correct levels, all comand names pattern match correctly etc.)
-performAction :: [String] -> [Character] -> [Character]
+performAction :: [String] -> [Character] -> NetworkPacket
 
 --health potion (restores up to 20 stamina)
-performAction ("HeP":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
+performAction ("HeP":targetName:_) chars@(user:_) = useItem [" health potion ", targetName] chars modifyTarget usedItems
     where
-        modifyTarget target = modifyStamina target $ min 20 $ maxStamina target - stamina target
+        modifyTarget target = ([logEntry], newChar)
+            where
+                amtHealed = min 20 $ maxStamina target - stamina target
+                logEntry = name target ++ " stamina +" ++ show amtHealed
+                newChar = modifyStamina target amtHealed
 
         usedItems = ItemList
             (numHealthPotions (items user) - 1) (numManaPotions $ items user) (numThrowingKnives $ items user)
             (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
 
 --mana potion (restores up to 20 ki)
-performAction ("MP":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
+performAction ("MP":targetName:_) chars@(user:_) = useItem [" mana potion ", targetName] chars modifyTarget usedItems
     where
-        modifyTarget target = modifyKi target $ min 20 $ maxKi target - ki target
+        modifyTarget target = ([logEntry], newChar)
+            where
+                amtHealed = min 20 $ maxKi target - ki target
+                logEntry = name target ++ " ki +" ++ show amtHealed
+                newChar = modifyKi target amtHealed
 
         usedItems = ItemList
             (numHealthPotions $ items user) (numManaPotions (items user) - 1) (numThrowingKnives $ items user)
             (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
 
 --throwing knives (deals 20 stamina damage)
-performAction ("TK":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
+performAction ("TK":targetName:_) chars@(user:_) = useItem [" throwing knives ", targetName] chars modifyTarget usedItems
     where
-        modifyTarget target = modifyStamina target (-20)
+        modifyTarget target = (logEntry, newChar)
+            where
+                logEntry
+                 | stamina target <= 20 = [name target ++ " stamina -20", name target ++ " perished"]
+                 | otherwise = [name target ++ " stamina -20"]
+
+                newChar = modifyStamina target (-20)
 
         usedItems = ItemList
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives (items user) - 1)
             (numMagicalSeals $ items user) (numWebTraps $ items user) (numHastePotions $ items user)
 
 --use magial seal (deals 20 ki damage)
-performAction ("MS":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
+performAction ("MS":targetName:_) chars@(user:_) = useItem [" magical seals ", targetName] chars modifyTarget usedItems
     where
-        modifyTarget target = modifyKi target (-20)
+        modifyTarget target = (logEntry, newChar)
+            where
+                logEntry
+                 | ki target <= 20 = [name target ++ " ki -20", name target ++ " perished"]
+                 | otherwise = [name target ++ " ki -20"]
+
+                newChar = modifyKi target (-20)
 
         usedItems = ItemList
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user)
             (numMagicalSeals (items user) - 1) (numWebTraps $ items user) (numHastePotions $ items user)
 
 --use web trap (halves target's speed)
-performAction ("WT":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
+performAction ("WT":targetName:_) chars@(user:_) = useItem [" web trap ", targetName] chars modifyTarget usedItems
     where
-        modifyTarget target = addStatusWithEffect target "webTrap" slowedTarget
-            where slowedTarget = modifySpeed target (-(speed target `div` 2))
+        modifyTarget target = (logEntry, newChar)
+            where
+                spdLost = -(speed target `div` 2)
+                logEntry = [name target ++ " web trapped (speed halved)", name target ++ " speed -" ++ show spdLost]
+                slowedChar = modifySpeed target spdLost
+                newChar = addStatusWithEffect target "webTrap" slowedChar
+
 
         usedItems = ItemList
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user)
             (numMagicalSeals $ items user) (numWebTraps (items user) - 1) (numHastePotions $ items user)
 
 --use haste potion (doubles target's speed)
-performAction ("HaP":targetName:_) chars@(user:_) = useItem targetName chars modifyTarget usedItems
+performAction ("HaP":targetName:_) chars@(user:_) = useItem [" haste potion ", targetName] chars modifyTarget usedItems
     where
-        modifyTarget target = addStatusWithEffect target "hastePotion" hastedTarget
-            where hastedTarget = modifySpeed target $ speed target
+        modifyTarget target = (logEntry, newChar)
+            where
+                spdGained = speed target
+                logEntry = [name target ++ " hasted (speed doubled)", name target ++ " speed +" ++ show spdGained]
+                hastedChar = modifySpeed target spdGained
+                newChar = addStatusWithEffect target "hastePotion" hastedChar
+
 
         usedItems = ItemList
             (numHealthPotions $ items user) (numManaPotions $ items user) (numThrowingKnives $ items user)
@@ -74,7 +104,7 @@ performAction ("HaP":targetName:_) chars@(user:_) = useItem targetName chars mod
 --stamina attack
 --single target attacks can have levels 0-3
 --group attacks can have levels 1-2
-performAction ("SA":level:targetName:_) chars = attackTarget [level, targetName] chars modifyStamina maxStamina userStatuses targetStatuses
+performAction ("SA":level:targetName:_) chars = attackTarget [" stamina ", level, targetName] chars enemyTeam modifyStamina maxStamina userStatuses targetStatuses
     where
         userStatuses = ("invigorate", "demoralize")
         targetStatuses = ("intimidate","shield")
@@ -82,7 +112,7 @@ performAction ("SA":level:targetName:_) chars = attackTarget [level, targetName]
 --ki attack
 --single target attacks can have levels 0-3
 --group attacks can have levels 1-2
-performAction ("KA":level:targetName:_) chars = attackTarget [level, targetName] chars modifyKi maxKi userStatuses targetStatuses
+performAction ("KA":level:targetName:_) chars = attackTarget [" ki ", level, targetName] chars enemyTeam modifyKi maxKi userStatuses targetStatuses
     where
         userStatuses = ("amplify", "dampen")
         targetStatuses = ("curse", "barrier")
@@ -90,36 +120,36 @@ performAction ("KA":level:targetName:_) chars = attackTarget [level, targetName]
 --heal
 --single target restores can have levels 1-3
 --group restores can have levels 1-2
-performAction ("Hl":level:targetName:_) chars = restoreTarget [level, targetName] chars modifyKi maxKi ki
+performAction ("Hl":level:targetName:_) chars = restoreTarget [" ki ", level, targetName] chars friendTeam modifyKi maxKi ki
 
 --rally
 --single target restores can have levels 1-3
 --group restores can have levels 1-2
-performAction ("Rly":level:targetName:_) chars = restoreTarget [level, targetName] chars modifyStamina maxStamina stamina
+performAction ("Rly":level:targetName:_) chars = restoreTarget [" stamina ", level, targetName] chars friendTeam modifyStamina maxStamina stamina
 
 --invigorate (target deals double damage on next stamina attack)
-performAction ("Invig":targetName:_) chars = statusTarget targetName chars modifyStamina "invigorate"
+performAction ("Invig":targetName:_) chars = statusTarget [" stamina ", "invigorate", targetName] chars friendTeam modifyStamina
 
 --demoralize (deals half damage on next stamina attack)
-performAction ("Demor":targetName:_) chars = statusTarget targetName chars modifyStamina "demoralize"
+performAction ("Demor":targetName:_) chars = statusTarget [" stamina ", "demoralize", targetName] chars enemyTeam modifyStamina 
 
 --intimidate (takes double damage from next stamina attack)
-performAction ("Intim":targetName:_) chars = statusTarget targetName chars modifyStamina "intimidate"
+performAction ("Intim":targetName:_) chars = statusTarget [" stamina ", "intimidate", targetName] chars enemyTeam modifyStamina
 
 --shield (takes half damage from next stamina attack)
-performAction ("Shld":targetName:_) chars = statusTarget targetName chars modifyStamina "shield"
+performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", "shield", targetName] chars friendTeam modifyStamina 
 
 --amplify (deals double damage on next ki attack)
-performAction ("Amp":targetName:_) chars = statusTarget targetName chars modifyKi "amplify"
+performAction ("Amp":targetName:_) chars = statusTarget [" ki ", "amplify", targetName] chars friendTeam modifyKi 
 
 --dampen (deals half damage on next ki attack)
-performAction ("Damp":targetName:_) chars = statusTarget targetName chars modifyKi "dampen"
+performAction ("Damp":targetName:_) chars = statusTarget [" ki ", "dampen", targetName] chars enemyTeam modifyKi 
 
 --curse (takes double damage from next ki attack)
-performAction ("Crs":targetName:_) chars = statusTarget targetName chars modifyKi "curse"
+performAction ("Crs":targetName:_) chars = statusTarget [" ki ", "curse", targetName] chars enemyTeam modifyKi 
 
 --barrier (takes half damage from next ki attack)
-performAction ("Brr":targetName:_) chars = statusTarget targetName chars modifyKi "barrier"
+performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targetName] chars friendTeam modifyKi 
 
 --determine enemies move, will impliment once we have more front end
 performAction ("Ea":_) _ = undefined
@@ -127,8 +157,8 @@ performAction ("Ea":_) _ = undefined
 performAction _ _ = undefined
 
 --generic function for using an item
-useItem :: String -> [Character] -> (Character -> Character) -> ItemList -> [Character]
-useItem targetName chars@(user:_) modifyTarget newItemList = returnUpdatedChars modifiedUser [target] modifyTarget chars
+useItem :: [String] -> [Character] -> (Character -> ([String], Character)) -> ItemList -> NetworkPacket
+useItem (itemName:targetName:_) chars@(user:_) modifyTarget newItemList = returnUpdatedChars ([itemName], modifiedUser) [target] modifyTarget chars
     where
         modifiedUser = modifyItems user newItemList
 
@@ -136,166 +166,155 @@ useItem targetName chars@(user:_) modifyTarget newItemList = returnUpdatedChars 
 
 useItem _ _ _ _  = undefined
 
---helper function for determing whether we should use attackSingle or attackGroup based off of user input
-attackTarget :: [String] -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> [Character]
-attackTarget (level:targetName:_)
-         | targetName == "A" = attackGroup level
-         | otherwise = attackSingle [level, targetName]
-attackTarget _ = undefined
-
---generic function for using single target attacks
-attackSingle :: [String] -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> [Character]
-attackSingle (levelString:targetName:_) chars@(user:_) modifyStat maxStat userStatuses targetStatuses = returnUpdatedChars modifiedUser [target] modifyTarget chars
+--generic attack function for attacks
+attackTarget :: [String] -> [Character] -> ([Character] -> [Character]) ->  (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> NetworkPacket
+attackTarget (atkType:levelString:targetName:_) chars@(user:_) getTeam modifyStat maxStat userStatuses targetStatuses = returnUpdatedChars modifiedUser targets modifyTarget chars
     where
         level = read levelString :: Int
 
-        cost = min (5 + (-15) * level) 0
+        cost
+         | targetName == "A" = - (30 * level)
+         | otherwise = min (5 + (-15) * level) 0
 
-        damageCalc t = min (-1) $ (maxStat user `div` maxStat t) * (-10 + cost) * attackMod * defenseMod
+        damageCalc t = min (-1) $ (maxStat user `div` maxStat t) * costMod * attackMod * defenseMod
             where
+                costMod
+                 | targetName == "A" = cost `div` 2
+                 | otherwise = -10 + cost
+
                 attackMod
-                    | fst userStatuses `elem` statuses user && snd userStatuses `elem` statuses user = 1
-                    | fst userStatuses `elem` statuses user = 2
-                    | snd userStatuses `elem` statuses user = 1 `div` 2
-                    | otherwise = 1
+                 | fst userStatuses `elem` statuses user && snd userStatuses `elem` statuses user = 1
+                 | fst userStatuses `elem` statuses user = 2
+                 | snd userStatuses `elem` statuses user = 1 `div` 2
+                 | otherwise = 1
 
                 defenseMod
-                    | fst targetStatuses `elem` statuses t && snd targetStatuses `elem` statuses t = 1
-                    | fst targetStatuses `elem` statuses t = 2
-                    | snd targetStatuses `elem` statuses t = 1 `div` 2
-                    | otherwise = 1
+                 | fst targetStatuses `elem` statuses t && snd targetStatuses `elem` statuses t = 1
+                 | fst targetStatuses `elem` statuses t = 2
+                 | snd targetStatuses `elem` statuses t = 1 `div` 2
+                 | otherwise = 1
 
-        modifiedUser = modifyStat buffedUser cost
-            where buffedUser = removeStatuses user [fst userStatuses, snd userStatuses]
+        --helper function for adding a used buff to the log
+        logBuff :: ((String, String) -> String) -> (String, String) -> Character -> [String]
+        logBuff select buffs char
+            | select buffs `elem` statuses char = [name char ++ fst buffs ++ " applied"]
+            | otherwise = []
 
-        target = getTarget chars targetName
-
-        modifyTarget t = modifyStat buffedTarget $ damageCalc t
-            where buffedTarget = removeStatuses t [fst userStatuses, snd targetStatuses]
-
-attackSingle _ _ _ _ _ _ = undefined
-
---generic function for group attacks
-attackGroup :: String -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> [Character]
-attackGroup levelString chars@(user:_) modifyStat maxStat userStatuses targetStatuses = returnUpdatedChars modifiedUser targets modifyTarget chars
-    where
-        level = read levelString :: Int
-
-        cost = - (30 * level)
-
-        damageCalc t = min (-1) $ (maxStat user `div` maxStat t) * (cost `div` 2) * attackMod * defenseMod
+        modifiedUser = (logEntries, newUser)
             where
-                attackMod
-                    | fst userStatuses `elem` statuses user && snd userStatuses `elem` statuses user = 1
-                    | fst userStatuses `elem` statuses user = 2
-                    | snd userStatuses `elem` statuses user = 1 `div` 2
-                    | otherwise = 1
+                logEntries = [name user ++ atkType ++ show cost] ++ fstBuffLog ++ sndBuffLog
+                    where
+                        fstBuffLog = logBuff fst userStatuses user
+                        sndBuffLog = logBuff snd userStatuses user
+                newUser = modifyStat buffedUser cost
+                buffedUser = removeStatuses user [fst userStatuses, snd userStatuses]
 
-                defenseMod
-                    | fst targetStatuses `elem` statuses t && snd targetStatuses `elem` statuses t = 1
-                    | fst targetStatuses `elem` statuses t = 2
-                    | snd targetStatuses `elem` statuses t = 1 `div` 2
-                    | otherwise = 1
+        targets
+         | targetName == "A" = getTeam chars
+         | otherwise = [getTarget chars targetName]
 
-        modifiedUser = modifyStat buffedUser cost
-            where buffedUser = removeStatuses user [fst userStatuses, snd userStatuses]
-
-        targets = enemyTeam chars
-
-        modifyTarget t = modifyStat buffedTarget $ damageCalc t
-            where buffedTarget = removeStatuses t [fst userStatuses, snd targetStatuses]
-
-attackGroup _ _ _ _ _ _ = undefined
-
---helper function for helping to determine whether we should use restore single or restore group based off of user input
-restoreTarget :: [String] -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (Character -> Int) -> [Character]
-restoreTarget (level:targetName:_)
-         | targetName == "A" = restoreGroup level
-         | otherwise = restoreSingle (level:[targetName])
-
-restoreTarget _ = undefined
-
---generic function for single target restore spells
---levels 1-3
-restoreSingle :: [String] -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (Character -> Int) -> [Character]
-restoreSingle (levelString:targetName:_) chars@(user:_) modifyStat maxStat stat = returnUpdatedChars modifiedUser [target] modifyTarget chars
-    where
-        level = read levelString :: Int
-
-        cost = 5 + (-15) * level
-
-        --if we want user to restore different stat from spell cost stat then we need to pass in two modifyStats
-        modifiedUser = modifyStat user cost
-
-        target = getTarget chars targetName
-
-        modifyTarget t = modifyStat t $ min (- (cost `div` 2)) (maxStat t - stat t)
-
-restoreSingle _ _ _ _ _ = undefined
-
---generic function for group restore spells
-restoreGroup :: String -> [Character] -> (Character -> Int -> Character) -> (Character -> Int) -> (Character -> Int) -> [Character]
-restoreGroup levelString chars@(user:_) modifyStat maxStat stat = returnUpdatedChars modifiedUser targets modifyTarget chars
-    where
-        level = read levelString :: Int
-
-        cost = - (30 * level)
-
-        modifiedUser = modifyStat user cost
-
-        targets = friendTeam chars
-
-        modifyTarget t = modifyStat t $ min (- (cost `div` 2)) (maxStat t - stat t)
-
-restoreGroup _ _ _ _ _ = undefined
-
---helper function for determing whether we should use statusSingle or statusGroup based off of user input
-statusTarget :: String -> [Character] -> (Character -> Int -> Character) -> String -> [Character]
-statusTarget targetName
-         | targetName == "A" = statusGroup friendTeam
-         | otherwise = statusSingle targetName
-
---generic function for using a single target status move
-statusSingle :: String -> [Character] -> (Character -> Int -> Character) -> String -> [Character]
-statusSingle targetName chars@(user:_) modifyStat status = returnUpdatedChars modifiedUser [target] modifyTarget chars
-    where
-        modifiedUser = modifyStat user (-25) --cost of buff/debuff is always same
-
-        target = getTarget chars targetName
-
-        modifyTarget t = addStatus t status
-
-statusSingle _ _ _ _ = undefined
-
---generic function for using a group target status move
-statusGroup :: ([Character] -> [Character]) -> [Character] -> (Character -> Int -> Character) -> String -> [Character]
-statusGroup getTeam chars@(user:_) modifyStat status = returnUpdatedChars modifiedUser targets modifyTarget chars
-    where
-        modifiedUser = modifyStat user (-60) --cost of buff/debuff is always same
-
-        targets = getTeam chars
-
-        modifyTarget t = addStatus t status
-
-statusGroup _ _ _ _ = undefined
-
---helper function for returning results from our group target generic functions
-returnUpdatedChars :: Character -> [Character] -> (Character -> Character) -> [Character] -> [Character]
-returnUpdatedChars modifiedUser targets modifyTarget chars = fixTurnOrder modifiedUser result
-    where
-        result 
-             | modifiedUser `elem` targets = replaceChars chars (modifyTarget modifiedUser : [modifyTarget curTar | curTar <- reducedTargets])
-             | otherwise = replaceChars chars (modifiedUser : [modifyTarget curTar | curTar <- targets])
-
-        reducedTargets = filter (/= modifiedUser) targets
-
-        --replace characters from the old list with characters from the new list
-        --filtering out all the dead characters then re-organizing them into turn order
-        replaceChars :: [Character] -> [Character] -> [Character]
-        replaceChars oldList updatedChars = getTurnOrder aliveChars
+        modifyTarget t = (logEntries, newTarget)
             where
-                unaffectedChars = filter (`notElem` updatedChars) oldList
-                aliveChars = filter (\c -> ki  c > 0 && stamina c > 0) (updatedChars ++ unaffectedChars)
+                buffedTarget = removeStatuses t [fst userStatuses, snd targetStatuses]
+                newTarget = modifyStat buffedTarget $ damageCalc t
+
+                logEntries = [name t ++ atkType ++ show (damageCalc t)] ++ hasDied ++ fstBuffLog ++ sndBuffLog
+                    where
+                        hasDied
+                         | stamina newTarget <= 0 || ki newTarget <= 0 = [name t ++ " has perished"] 
+                         | otherwise = []
+                        fstBuffLog = logBuff fst targetStatuses t
+                        sndBuffLog = logBuff snd targetStatuses t
+
+attackTarget _ _ _ _ _ _ _ = undefined
+
+--generic function for restore abilities
+restoreTarget :: [String] -> [Character] -> ([Character] -> [Character]) ->  (Character -> Int -> Character) -> (Character -> Int) -> (Character -> Int) -> NetworkPacket
+restoreTarget (rstrType:levelString:targetName:_) chars@(user:_) getTeam modifyStat maxStat stat = returnUpdatedChars modifiedUser targets modifyTarget chars
+    where
+        level = read levelString :: Int
+
+        cost
+         | targetName == "A" = - (30 * level)
+         | otherwise = 5 + (-15) * level
+
+        modifiedUser = (logEntries, newUser) 
+            where
+                logEntries = [name user ++ rstrType ++ show cost]
+                newUser = modifyStat user cost
+
+        targets
+         | targetName == "A" = getTeam chars
+         | otherwise = [getTarget chars targetName]
+
+        modifyTarget t = (logEntries, newUser)
+            where
+                rstrAmt = min (- (cost `div` 2)) (maxStat t - stat t)
+                logEntries = [name t ++ rstrType ++ show rstrAmt]
+                newUser = modifyStat t rstrAmt
+
+restoreTarget _ _ _ _ _ _ = undefined
+
+--generic function for status abilities
+statusTarget :: [String] -> [Character] -> ([Character] -> [Character]) -> (Character -> Int -> Character)  -> NetworkPacket
+statusTarget (costType:status:targetName:_) chars@(user:_) getTeam modifyStat = returnUpdatedChars modifiedUser targets modifyTarget chars
+    where
+        modifiedUser = (logEntry, newUser) 
+            where
+                cost 
+                 | targetName == "A" = -60 --cost of buff/debuff is always same
+                 | otherwise = -25
+
+                logEntry = [name user ++ costType ++ show cost]
+
+                newUser = modifyStat user cost
+ 
+        targets
+         | targetName == "A" = getTeam chars
+         | otherwise = [getTarget chars targetName]
+
+        modifyTarget t = (logEntry, newTarget)
+            where
+                logEntry = [name t ++ status ++ " gained "]
+                newTarget = addStatus t status
+
+statusTarget _ _ _ _ = undefined
+
+--helper function for returning results from our generic functions
+returnUpdatedChars :: ([String], Character) -> [Character] -> (Character -> ([String], Character)) -> [Character] -> NetworkPacket
+returnUpdatedChars modifiedUser targets modifyTarget chars = TurnPacket logResult (fixTurnOrder (snd modifiedUser) result)
+    where
+        --after we re-organize everyone by speed we need to re-iterate back through
+        --whose turn it currently is
+        fixTurnOrder :: Character -> [Character] -> [Character]
+        fixTurnOrder turnChar (char:chars') =
+            if turnChar == char then chars' ++ [char]
+            else fixTurnOrder turnChar (chars' ++ [char])
+        fixTurnOrder _ _ = undefined
+
+
+        logResult :: [String]
+        logResult = fst modifiedUser ++ processTargets targets
+            where
+                processTargets [] = undefined
+                processTargets (t:ts) = fst (modifyTarget t) ++ processTargets ts
+
+        --result is the result of applying our modifyTarget function onto all of our targets 
+        result :: [Character]
+        result
+         | snd modifiedUser `elem` targets = replaceChars chars (snd (modifyTarget $ snd modifiedUser) : [snd $ modifyTarget curTar | curTar <- reducedTargets])
+         | otherwise = replaceChars chars (snd modifiedUser : [ snd $ modifyTarget curTar | curTar <- targets])
+         where
+            reducedTargets :: [Character]
+            reducedTargets = filter (/= snd modifiedUser) targets
+
+            --replace characters from the old list with characters from the new list
+            --filtering out all the dead characters then re-organizing them into turn order
+            replaceChars :: [Character] -> [Character] -> [Character]
+            replaceChars oldChars updatedChars = getTurnOrder aliveChars
+                where
+                    unaffectedChars = filter (`notElem` updatedChars) oldChars
+                    aliveChars = filter (\c -> ki  c > 0 && stamina c > 0) (updatedChars ++ unaffectedChars)
 
 -- enemyActions :: [Class] -> IO [Class]
 -- enemyActions chars@(turnChar:_) = do
