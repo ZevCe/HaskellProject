@@ -13,7 +13,7 @@ import Character
 --The action specified by the list of strings is valid
 --The character can perform the given action (i.e. has enough items/ki/stamina or the ability to use action in the first place)
 --no invalid inputs (all levels are correct levels, all comand names pattern match correctly etc.)
-performAction :: [String] -> [Character] -> NetworkPacket
+performAction :: [String] -> [Character] -> TurnPacket
 
 --health potion (restores up to 20 stamina)
 performAction ("HeP":targetName:_) chars@(user:_) = useItem [" health potion ", targetName] chars modifyTarget usedItems
@@ -157,7 +157,7 @@ performAction ("Ea":_) _ = undefined
 performAction _ _ = undefined
 
 --generic function for using an item
-useItem :: [String] -> [Character] -> (Character -> ([String], Character)) -> ItemList -> NetworkPacket
+useItem :: [String] -> [Character] -> (Character -> ([String], Character)) -> ItemList -> TurnPacket
 useItem (itemName:targetName:_) chars@(user:_) modifyTarget newItemList = returnUpdatedChars ([itemName], modifiedUser) [target] modifyTarget chars
     where
         modifiedUser = modifyItems user newItemList
@@ -167,7 +167,7 @@ useItem (itemName:targetName:_) chars@(user:_) modifyTarget newItemList = return
 useItem _ _ _ _  = undefined
 
 --generic attack function for attacks
-attackTarget :: [String] -> [Character] -> ([Character] -> [Character]) ->  (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> NetworkPacket
+attackTarget :: [String] -> [Character] -> ([Character] -> [Character]) ->  (Character -> Int -> Character) -> (Character -> Int) -> (String, String) -> (String, String) -> TurnPacket
 attackTarget (atkType:levelString:targetName:_) chars@(user:_) getTeam modifyStat maxStat userStatuses targetStatuses = returnUpdatedChars modifiedUser targets modifyTarget chars
     where
         level = read levelString :: Int
@@ -229,7 +229,7 @@ attackTarget (atkType:levelString:targetName:_) chars@(user:_) getTeam modifySta
 attackTarget _ _ _ _ _ _ _ = undefined
 
 --generic function for restore abilities
-restoreTarget :: [String] -> [Character] -> ([Character] -> [Character]) ->  (Character -> Int -> Character) -> (Character -> Int) -> (Character -> Int) -> NetworkPacket
+restoreTarget :: [String] -> [Character] -> ([Character] -> [Character]) ->  (Character -> Int -> Character) -> (Character -> Int) -> (Character -> Int) -> TurnPacket
 restoreTarget (rstrType:levelString:targetName:_) chars@(user:_) getTeam modifyStat maxStat stat = returnUpdatedChars modifiedUser targets modifyTarget chars
     where
         level = read levelString :: Int
@@ -256,7 +256,7 @@ restoreTarget (rstrType:levelString:targetName:_) chars@(user:_) getTeam modifyS
 restoreTarget _ _ _ _ _ _ = undefined
 
 --generic function for status abilities
-statusTarget :: [String] -> [Character] -> ([Character] -> [Character]) -> (Character -> Int -> Character)  -> NetworkPacket
+statusTarget :: [String] -> [Character] -> ([Character] -> [Character]) -> (Character -> Int -> Character)  -> TurnPacket
 statusTarget (costType:status:targetName:_) chars@(user:_) getTeam modifyStat = returnUpdatedChars modifiedUser targets modifyTarget chars
     where
         modifiedUser = (logEntry, newUser) 
@@ -281,7 +281,7 @@ statusTarget (costType:status:targetName:_) chars@(user:_) getTeam modifyStat = 
 statusTarget _ _ _ _ = undefined
 
 --helper function for returning results from our generic functions
-returnUpdatedChars :: ([String], Character) -> [Character] -> (Character -> ([String], Character)) -> [Character] -> NetworkPacket
+returnUpdatedChars :: ([String], Character) -> [Character] -> (Character -> ([String], Character)) -> [Character] -> TurnPacket
 returnUpdatedChars modifiedUser targets modifyTarget chars = TurnPacket logResult (fixTurnOrder (snd modifiedUser) result)
     where
         --after we re-organize everyone by speed we need to re-iterate back through
@@ -296,7 +296,7 @@ returnUpdatedChars modifiedUser targets modifyTarget chars = TurnPacket logResul
         logResult :: [String]
         logResult = fst modifiedUser ++ processTargets targets
             where
-                processTargets [] = undefined
+                processTargets [] = []
                 processTargets (t:ts) = fst (modifyTarget t) ++ processTargets ts
 
         --result is the result of applying our modifyTarget function onto all of our targets 

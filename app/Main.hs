@@ -28,6 +28,8 @@ main = scotty 3000 $ do
 
     --post request for calculating new info for a round
     post "/roundInfo" $ do
-        info <- jsonData :: ActionM NetworkPacket
+        info <- jsonData :: ActionM TurnPacket
         liftIO $ print info
-        json $ performAction (action info) (turnOrder info)
+        let returnVal = performAction (action info) (turnOrder info)
+        liftIO $ print returnVal
+        json returnVal

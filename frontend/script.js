@@ -594,6 +594,18 @@ async function loadEncounter(encounterName) {
         testMessage2.textContent = "ERROR";
     }
 
+    //renaming our json to match the turn json packet better
+    let classesTemp = BattleState.classes
+    let turnOrderTemp = BattleState.turnOrderInit
+
+    BattleState = {
+        classes : classesTemp,
+        turnOrder : turnOrderTemp
+    }
+
+    console.log("new battle state");
+    console.log(BattleState)
+
     getCharacters();
     displayBoard();
     getTurnOrder();

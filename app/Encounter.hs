@@ -1,34 +1,30 @@
 module Encounter where
 import Character
 
---helper function for turning list of characters into encounter info datatype
-parseToEncounterInfo :: [(ClassSkills, Character)] -> NetworkPacket
-parseToEncounterInfo fullInfo = LoadPacket classSkills turnOrd
-    where
-        classSkills = [fst curChar | curChar <- fullInfo]
-        turnOrd = getTurnOrder [snd curChar | curChar <- fullInfo]
-
-encounterTutorial :: NetworkPacket
-encounterTutorial =  parseToEncounterInfo [getGod, getRat]
-
-
--- Warrior, Cleric
--- Haskeleton, Rat
-encounter1 :: NetworkPacket
-encounter1 = parseToEncounterInfo [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
-
---1x warrior, 1x mage, 1x cleric, 1x rogue
---2x rogue, 2x mage
-encounter2 :: NetworkPacket
-encounter2 = parseToEncounterInfo
-    [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein",
-    evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
-
-getEncounter :: String -> NetworkPacket
+getEncounter :: String -> LoadPacket
 getEncounter input
      | input == "1" = encounter1
      | input == "2" = encounter2
      | otherwise = encounterTutorial
+    where 
+        --helper function for turning list of characters into encounter info datatype
+        parseToEncounterInfo :: [(ClassSkills, Character)] -> LoadPacket
+        parseToEncounterInfo fullInfo = LoadPacket classSkills turnOrd
+            where
+                classSkills = [fst curChar | curChar <- fullInfo]
+                turnOrd = getTurnOrder [snd curChar | curChar <- fullInfo]
+
+        encounterTutorial =  parseToEncounterInfo [getGod, getRat]
+
+        -- Warrior, Cleric
+        -- Haskeleton, Rat
+        encounter1 = parseToEncounterInfo [getWarrior "Zev", getCleric "David", getHaskeleton, getRat]
+
+        --1x warrior, 1x mage, 1x cleric, 1x rogue
+        --2x rogue, 2x mage
+        encounter2 = parseToEncounterInfo
+            [getWarrior "Stark", getMage "Fern", getCleric "Frieren", getRogue "Sein",
+            evilRogue "Wirbel", evilRogue "Ubel", evilMage "Aura", evilMage "Lugner"]
 
 -- Doesn't take into account invalid names, maybe a ST fix later
 -- leaving this block below here for reference in case james forgot which chars had which abilities

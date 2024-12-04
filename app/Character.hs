@@ -75,14 +75,19 @@ instance ToJSON ClassSkills
 --action can either be the action for the back end to perform
 --or the log of updates to display to the player for the front end
 --incoming and outgoing packets may eventually be different, just for initial testing they are the same
-data NetworkPacket =
+data TurnPacket =
     TurnPacket { action     :: [String],
                  turnOrder  :: [Character]}
-    |LoadPacket { classes   :: [ClassSkills],
-                  turnOrder :: [Character]}
     deriving(Generic, Show)
-instance FromJSON NetworkPacket
-instance ToJSON NetworkPacket
+instance FromJSON TurnPacket
+instance ToJSON TurnPacket
+
+data LoadPacket = 
+    LoadPacket { classes   :: [ClassSkills],
+                  turnOrderInit :: [Character]}
+    deriving(Generic, Show)
+instance FromJSON LoadPacket
+instance ToJSON LoadPacket
 
 --returns the list of characters sorted by speed (descending)
 getTurnOrder :: [Character] -> [Character]
