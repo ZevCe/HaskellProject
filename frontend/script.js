@@ -10,6 +10,7 @@ const STAM_MOVES = ["stamAttack",
 let BattleState = null;
 let CharacterMenus = new Map();
 let CurrentAttacker = null;
+let CurrentMove = null;
 
 /*************
  * FUNCTIONS *
@@ -135,7 +136,7 @@ function getCharacters() {
             menu.push("intimidate");
         }
         if (currentClass.invigorate) {
-            menu.push("invigoratRlye");
+            menu.push("invigorate");
         }
         if (currentClass.kiAttack) {
             menu.push("kiAttack");
@@ -505,7 +506,7 @@ function getItems() {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             potion.style.backgroundColor = "green";
-            getItemFriendlyTargets("MS");
+            getItemEnemyTargets("MS");
         });
         subMenu.appendChild(potion);
     }
@@ -597,9 +598,11 @@ async function loadEncounter(encounterName) {
     displayBoard();
     getTurnOrder();
     getNextTurn();
+    // attack("SA", "3", "Rat");
 }
 
-async function testAction() {
+async function action(move, level, target) {
+    const a = [move, level, target];
 
     let request = {
         action : ["SA","3","Rat"],
@@ -634,3 +637,9 @@ async function testAction() {
         console.error("ERROR! ", error);
     }
 }
+
+const testButton = document.querySelector("#test");
+testButton.addEventListener("click", () => {
+    appendToCombatLog(`DEBUG: Attempting to send JSON`);
+    action("Test", "Test", "Test");
+});
