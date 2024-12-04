@@ -135,7 +135,7 @@ function getCharacters() {
             menu.push("intimidate");
         }
         if (currentClass.invigorate) {
-            menu.push("invigorate");
+            menu.push("invigoratRlye");
         }
         if (currentClass.kiAttack) {
             menu.push("kiAttack");
@@ -174,7 +174,7 @@ function isValidAttack(cost, costType) {
     return false;
 }
 
-function getEnemyTargets(move, type) {
+function getEnemyTargets(move, type, level) {
     const targetDiv = document.querySelector(".target-menu");
     targetDiv.innerHTML = "";
 
@@ -183,15 +183,14 @@ function getEnemyTargets(move, type) {
             const target = document.createElement("button");
             target.innerText = `${char.name}`;
             target.addEventListener("click", () => {
-                appendToCombatLog(`DEBUG: Send level 1 ${type} ${move} to ${char.name}`);
+                appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
             });
             targetDiv.appendChild(target);
         }
     });
 }
 
-function getBasicAttack(move, type) {
-    let costType = move == "kiAttack" ? "ki" : "stamina";
+function getBasicAttack(move, type, costType) {
     let cost1 = getSpellCost(move, type, 1);
     let cost2 = getSpellCost(move, type, 2);
     let cost3 = getSpellCost(move, type, 3);
@@ -204,17 +203,20 @@ function getBasicAttack(move, type) {
         //         button.style.backgroundColor = "rgb(212, 180, 180)";
         // });
 
-        const level0 = document.createElement("button");
-        level0.innerText = `Level 0 (0)`;
-        level0.addEventListener("click", () => {
-            const attackButtons = document.querySelectorAll(".attack-menu button");
-            attackButtons.forEach(button => {
-                button.style.backgroundColor = "rgb(212, 180, 180)";
+        // Special case for 0 cost attacks for kiAttack/stamAttack
+        if (move == "KA" || move == "SA") {
+            const level0 = document.createElement("button");
+            level0.innerText = `Level 0 (0)`;
+            level0.addEventListener("click", () => {
+                const attackButtons = document.querySelectorAll(".attack-menu button");
+                attackButtons.forEach(button => {
+                    button.style.backgroundColor = "rgb(212, 180, 180)";
+                });
+                level0.style.backgroundColor = "green";
+                getEnemyTargets(move, type, 0);
             });
-            level0.style.backgroundColor = "green";
-            getEnemyTargets(move, type);
-        });
-        attackMenuDiv.appendChild(level0);
+            attackMenuDiv.appendChild(level0);
+        }
         
         if (!isValidAttack(cost1, costType)) { return; }
 
@@ -226,7 +228,7 @@ function getBasicAttack(move, type) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level1.style.backgroundColor = "green";
-            getEnemyTargets(move, type);
+            getEnemyTargets(move, type, 1);
         });
         attackMenuDiv.appendChild(level1);
 
@@ -240,7 +242,7 @@ function getBasicAttack(move, type) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level2.style.backgroundColor = "green";
-            getEnemyTargets(move, type);
+            getEnemyTargets(move, type, 2);
         });
         attackMenuDiv.appendChild(level2);
 
@@ -254,7 +256,7 @@ function getBasicAttack(move, type) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level3.style.backgroundColor = "green";
-            getEnemyTargets(move, type);
+            getEnemyTargets(move, type, 3);
         });
         attackMenuDiv.appendChild(level3);
 
@@ -275,7 +277,7 @@ function getBasicAttack(move, type) {
     const level2 = document.createElement("button");
     level2.innerText = `Level 2 (${cost2})`;
     level2.addEventListener("click", () => {
-        appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+        appendToCombatLog(`DEBUG: Send level 2 ${type} ${move}`);
     });
     attackMenuDiv.appendChild(level2);
 }
@@ -292,15 +294,52 @@ function getSpells(move, type) {
     }
 
     // Basic attacks
-    if (move == "kiAttack" || move == "stamAttack") {
-        let moveCode = move == "kiAttack" ? "KA" : "SA";
-        getBasicAttack(moveCode , type);
-        return;
-    }
+    // if (move == "kiAttack" || move == "stamAttack") {
+    //     let moveCode = move == "kiAttack" ? "KA" : "SA";
+    //     getBasicAttack(moveCode , type);
+    //     return;
+    // }
 
-    // Ki attacks
-    if (costType = "ki") {
-
+    switch (move) {
+        case "kiAttack":
+            getBasicAttack("KA", type, costType);
+            break;
+        case "stamAttack":
+            getBasicAttack("SA", type, costType);
+            break;
+        case "rally":
+            getBasicAttack("Rly", type, costType);
+            break;
+        case "invigorate":
+            getBasicAttack("Invig", type, costType);
+            break;
+        case "demoralize":
+            getBasicAttack("Demor", type, costType);
+            break;
+        case "intimidate":
+            getBasicAttack("Intim", type, costType);
+            break;
+        case "shield":
+            getBasicAttack("Shld", type, costType);
+            break;
+        case "heal":
+            getBasicAttack("Hl", type, costType);
+            break;
+        case "amplify":
+            getBasicAttack("Amp", type, costType);
+            break;
+        case "barrier":
+            getBasicAttack("Brr", type, costType);
+            break;
+        case "dampen":
+            getBasicAttack("Damp", type, costType);
+            break;
+        case "curse":
+            getBasicAttack("Crs", type, costType);
+            break;
+        default:
+            appendToCombatLog("Invalid move (Should not reach here)");
+            break;
     }
 }
 
