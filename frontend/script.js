@@ -109,13 +109,19 @@ function createStatBlock(character = null) {
 
 function setStatusDiv(character) {
     const statuses = document.querySelector(`#${character.name} .stat-block .status`);
-    // // Statues: Red debuff, green buff
-    // console.log(statuses);
+    // Statues: Red debuff, green buff
     if (character.statuses.length == 0) {
+        // Replace with "" after testing
         statuses.innerText = "0";
     } else {
-        statuses.innerText = "Not 0";
+        // Go through the list and add each buff/debuff
+        statuses.innerText = createStatusString(character.name, character.statuses);
     }
+}
+
+function createStatusString(name, statuses) {
+    // 
+    return "Not 0";
 }
 
 function displayBoard() {
