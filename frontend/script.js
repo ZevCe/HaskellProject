@@ -34,6 +34,8 @@ function updateCombatLog() {
     for (let i = 1; i < moves.length; i++) {
         appendToCombatLog(moves[i]);
     }
+
+    appendToCombatLog("");
 }
 
 function getTeams() {
@@ -112,7 +114,7 @@ function displayBoard() {
 }
 
 function endGame() {
-    
+    return;
 }
 
 function getNextTurn() {
