@@ -2,7 +2,7 @@ module Actions where
 --somebody smarter than me should do the thing where you only export certain functions
 --and the only function we need to export from this file is performAction
 
-
+import System.Random
 import Character
 
 --takes a list of strings and a list of all characters, pattern matches the string list
@@ -152,9 +152,18 @@ performAction ("Crs":targetName:_) chars = statusTarget [" ki ", "curse", target
 performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targetName] chars friendTeam modifyKi 
 
 --determine enemies move, will impliment once we have more front end
-performAction ("Ea":_) _ = undefined
+performAction ("Ea":_) char = attackTarget [" stamina ", "1", (name ((friendTeam char) !! targetIndex))] char friendTeam modifyStamina maxStamina userStatuses targetStatuses
+    where
+        userStatuses = ("invigorate", "demoralize")
+        targetStatuses = ("intimidate","shield")
+        seed = mkStdGen 17
+        (targetIndex, afterTargetGen) = randomInt (1, length (friendTeam char)) seed
 
 performAction _ _ = undefined
+
+randomInt :: (Int, Int) -> StdGen -> (Int, StdGen)
+randomInt range gen = randomR range gen
+
 
 --generic function for using an item
 useItem :: [String] -> [Character] -> (Character -> ([String], Character)) -> ItemList -> TurnPacket
