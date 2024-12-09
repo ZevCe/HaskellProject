@@ -140,16 +140,16 @@ performAction ("Intim":targetName:_) chars = statusTarget [" stamina ", "intimid
 performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", "shield", targetName] chars friendTeam modifyStamina 
 
 --amplify (deals double damage on next ki attack)
-performAction ("Amp":targetName:_) chars = statusTarget [" ki ", "amplify", targetName] chars friendTeam modifyKi 
+performAction ("Amp":targetName:_) chars = statusTarget [" ki ", " amplify", targetName] chars friendTeam modifyKi 
 
 --dampen (deals half damage on next ki attack)
-performAction ("Damp":targetName:_) chars = statusTarget [" ki ", "dampen", targetName] chars enemyTeam modifyKi 
+performAction ("Damp":targetName:_) chars = statusTarget [" ki ", " dampen", targetName] chars enemyTeam modifyKi 
 
 --curse (takes double damage from next ki attack)
-performAction ("Crs":targetName:_) chars = statusTarget [" ki ", "curse", targetName] chars enemyTeam modifyKi 
+performAction ("Crs":targetName:_) chars = statusTarget [" ki ", " curse", targetName] chars enemyTeam modifyKi 
 
 --barrier (takes half damage from next ki attack)
-performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targetName] chars friendTeam modifyKi 
+performAction ("Brr":targetName:_) chars = statusTarget [" ki ", " barrier", targetName] chars friendTeam modifyKi 
 
 --determine enemies move, will impliment once we have more front end
 performAction ("Ea":moves) chars = 
@@ -165,11 +165,11 @@ performAction ("Ea":moves) chars =
         "Brr" -> statusTarget [" ki ", " barrier", targetAlly] chars enemyTeam modifyKi 
         _ -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
     where
-        seed = mkStdGen 17
-        (enemyIndex, afterEnemyGen) = randomInt (1, length (friendTeam chars)) seed
-        (allyIndex, afterAllyGen) = randomInt (1, length (enemyTeam chars)) afterEnemyGen
-        (moveIndex, afterMoveGen) = randomInt (1, length moves) afterAllyGen
-        (levelIndex, afterLevelGen) = randomInt (1, 3) afterMoveGen
+        seed = mkStdGen ((length ((friendTeam chars))-1) * (length ((friendTeam chars))) + (length (enemyTeam chars)) * 2)
+        (enemyIndex, afterEnemyGen) = randomInt (0, (length (friendTeam chars))-1) seed
+        (allyIndex, afterAllyGen) = randomInt (0, (length (enemyTeam chars))-1) afterEnemyGen
+        (moveIndex, afterMoveGen) = randomInt (0, (length moves)-1) afterAllyGen
+        (levelIndex, afterLevelGen) = randomInt (0, 3) afterMoveGen
         moveType = moves !! moveIndex
         levelType = show levelIndex
         targetEnemy = (name ((friendTeam chars) !! enemyIndex))
