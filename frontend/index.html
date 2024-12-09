@@ -8,59 +8,64 @@
     <title>Test</title>
 </head>
 
-<body onload="loadEncounter(1)">
+<body onload="loadEncounter(-1)">
     <!-- <button onclick="loadEncounter(1);">Load Encounter</button>
 
     <button onclick="testAction();">Test Action</button> -->
-
-    <div class="board">
-        <div id="left-side">
-            <!--Enemy Characters-->
-            <div class="enemy-display">
-
-            </div>
-        
-            <!--Player Characters-->
-            <div class="friend-display">
-
-            </div>
-        
-            <!--Menu-->
-            <div class="menu">
-                <!--Menu for showing main skills-->
-                <div class="main-menu">
-                    
-                </div>
-
-                <!--Menu for showing submenu for items/single or group-->
-                <div class="sub-menu">
+    <div class="top">
+        <div class="board">
+            <div id="left-side">
+                <!--Enemy Characters-->
+                <div class="enemy-display">
 
                 </div>
-
-                <!--Menu for showing attack levels and cost-->
-                <div class="attack-menu">
-
-                </div>
-
-                <!--Menu for showing targets for single target spells-->
-                <div class="target-menu">
-
-                </div>
-            </div>
-        </div>
-
-        <div id="right-side">
-            <div class="combat-log">
-
-            </div>
-        </div>
-    </div>
-
-    <div id="turn-order">
             
-    </div>
+                <!--Player Characters-->
+                <div class="friend-display">
 
-    <button id="test">TEST</button>
+                </div>
+            
+                <!--Menu-->
+                <div class="menu">
+                    <!--Menu for showing main skills-->
+                    <div class="main-menu">
+                        
+                    </div>
+
+                    <!--Menu for showing submenu for items/single or group-->
+                    <div class="sub-menu">
+
+                    </div>
+
+                    <!--Menu for showing attack levels and cost-->
+                    <div class="attack-menu">
+
+                    </div>
+
+                    <!--Menu for showing targets for single target spells-->
+                    <div class="target-menu">
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="right-side">
+                <div class="combat-log">
+
+                </div>
+            </div>
+        </div>
+
+        <div id="turn-order">
+                
+        </div>
+
+    </div>
+    <div class="encounters">
+        <button class="encounter-button" id="tut">Tutorial</button>
+        <button class="encounter-button" id="e1">Encounter 1</button>
+        <button class="encounter-button" id="e2">Encounter 2</button>
+    </div>
 </body>
 
 </html>

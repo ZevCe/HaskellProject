@@ -110,9 +110,9 @@ function createStatBlock(character = null) {
 function setStatusDiv(character) {
     const statuses = document.querySelector(`#${character.name} .stat-block .status`);
     // Statues: Red debuff, green buff
+    statuses.innerText = "";
     if (character.statuses.length == 0) {
         // Replace with "" after testing
-        statuses.innerText = "";
     } else {
         // Go through the list and add each buff/debuff
         statuses.innerText = createStatusString(character.name, character.statuses);
@@ -333,12 +333,71 @@ function getEnemyTargets(move, type, level) {
     });
 }
 
+function getStatus(move, type, costType) {
+    let costSingle = 25;
+    let costGroup = 60;
+    const attackMenuDiv = document.querySelector(".attack-menu");
+    attackMenuDiv.innerHTML = "";
+
+    if (type == "single") {
+        if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
+            const targetDiv = document.querySelector(".attack-menu");
+            targetDiv.innerHTML = "";
+        
+            BattleState.turnOrder.forEach(char => {
+                if (char.team == "Friend") {
+                    const target = document.createElement("button");
+                    target.innerText = `${char.name} (${costSingle})`;
+                    target.addEventListener("click", () => {
+                        // appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
+                        action(move, 0, char.name);
+                    });
+                    targetDiv.appendChild(target);
+                }
+            });
+        } else {
+            const targetDiv = document.querySelector(".attack-menu");
+            targetDiv.innerHTML = "";
+        
+            BattleState.turnOrder.forEach(char => {
+                if (char.team == "Enemy") {
+                    const target = document.createElement("button");
+                    target.innerText = `${char.name} (${costSingle})`;
+                    target.addEventListener("click", () => {
+                        // appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
+                        action(move, 0, char.name);
+                    });
+                    targetDiv.appendChild(target);
+                }
+            });
+        }
+
+        return;
+    }
+
+    if (!isValidAttack(costGroup, costType)) { return; }
+
+    const level2 = document.createElement("button");
+    level2.innerText = `Cast ${move} (${costGroup})`;
+    level2.addEventListener("click", () => {
+        // appendToCombatLog(`DEBUG: Send level 2 ${type} ${move}`);
+        action(move, 2, "A");
+    });
+    attackMenuDiv.appendChild(level2);
+}
+
 function getBasicAttack(move, type, costType) {
     let cost1 = getSpellCost(type, 1);
     let cost2 = getSpellCost(type, 2);
     let cost3 = getSpellCost(type, 3);
     const attackMenuDiv = document.querySelector(".attack-menu");
     attackMenuDiv.innerHTML = "";
+
+    if (move == "Invig" || move == "Demor" || move == "Intim" || move == "Shld" ||
+        move == "Amp" || move == "Damp" || move == "Crs" || move == "Brr") {
+            getStatus(move, type, costType);
+            return;
+        }
 
     if (type == "single") {
         // const submenuButtons = document.querySelectorAll(".sub-menu button");
@@ -371,7 +430,7 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level1.style.backgroundColor = "green";
-            if (move == "Invig" || move == "Shld" || move == "Damp" || move == "Brr") {
+            if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
                 getFriendlyTargets(move, type, 1);
             } else {
                 getEnemyTargets(move, type, 1);
@@ -389,7 +448,7 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level2.style.backgroundColor = "green";
-            if (move == "Invig" || move == "Shld" || move == "Damp" || move == "Brr") {
+            if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
                 getFriendlyTargets(move, type, 2);
             } else {
                 getEnemyTargets(move, type, 2);
@@ -407,7 +466,7 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level3.style.backgroundColor = "green";
-            if (move == "Invig" || move == "Shld" || move == "Damp" || move == "Brr") {
+            if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
                 getFriendlyTargets(move, type, 3);
             } else {
                 getEnemyTargets(move, type, 3);
@@ -736,7 +795,7 @@ function getTurnOrder() {
  *************/
 async function loadEncounter(encounterName) {
     console.log(`Attempting to load encounter ${encounterName}`);
-    appendToCombatLog(`Loading ${encounterName}`);
+    // appendToCombatLog(`Loading ${encounterName}`);
     const url = `http://localhost:3000/loadEncounter/${encounterName}`;
 
     try {
@@ -835,8 +894,18 @@ async function action(move, level, target) {
     getNextTurn();
 }
 
-const testButton = document.querySelector("#test");
-testButton.addEventListener("click", () => {
-    // appendToCombatLog(`DEBUG: Attempting to send JSON`);
-    action("Ea", null, null);
+const tutorial = document.querySelector("#tut");
+tutorial.addEventListener("click", () => {
+
+    loadEncounter(-1);
+});
+
+const e1 = document.querySelector("#e1");
+e1.addEventListener("click", () => {
+    loadEncounter(1);
+});
+
+const e2 = document.querySelector("#e2");
+e2.addEventListener("click", () => {
+    loadEncounter(2);
 });
