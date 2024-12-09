@@ -9,8 +9,12 @@ const STAM_MOVES = ["stamAttack",
 // GLOBALS
 let BattleState = null;
 let CharacterMenus = new Map();
+let CharacterMenusBackend = new Map();
 let CurrentAttacker = null;
 let CurrentMove = null;
+
+let Enemies = null;
+let Friends = null;
 
 /*************
  * FUNCTIONS *
@@ -23,18 +27,33 @@ function appendToCombatLog(toAppend) {
     combatLogDiv.insertBefore(par, combatLogDiv.firstChild);
 }
 
-// function getTeams(turnOrder) {
-//     enemies = [];
-//     friends = [];
+function updateCombatLog() {
+    let moves = BattleState.action;
+    // console.log(moves);
 
-//     turnOrder.forEach(char => {
-//         if (char.team == "Friend") {
-//             friends.push(char);
-//         } else {
-//             enemies.push(char);
-//         }
-//     });
-// }
+    for (let i = 1; i < moves.length; i++) {
+        appendToCombatLog(moves[i]);
+    }
+}
+
+function getTeams() {
+    turnOrder = BattleState.turnOrder;
+    console.log(turnOrder);
+
+    Enemies = [];
+    Friends = [];
+
+    turnOrder.forEach(char => {
+        if (char.team == "Friend") {
+            Friends.push(char);
+        } else {
+            Enemies.push(char);
+        }
+    });
+
+    console.log(Enemies);
+    console.log(Friends);
+}
 
 function createStatBlock(character = null) {
     if (character == null) {
@@ -92,16 +111,28 @@ function displayBoard() {
     });
 }
 
+function endGame() {
+    
+}
+
 function getNextTurn() {
     CurrentAttacker = BattleState.turnOrder[0];
+    // console.log(CurrentAttacker);
 
-    appendToCombatLog(`${CurrentAttacker.name} gets ready to attack!`);
+    getTeams();
+
+    if (Friends.length == 0 || Enemies.length == 0) {
+        endGame();
+        return;
+    }
+
+    appendToCombatLog(`${CurrentAttacker.name} is ready to attack!`);
 
     if (CurrentAttacker.team == "Friend") {
-        appendToCombatLog("DEBUG: Friend");
+        // appendToCombatLog("DEBUG: Friend");
         getMenu();
     } else {
-        appendToCombatLog("DEBUG: Enemy");
+        // appendToCombatLog("DEBUG: Enemy");
         action("Ea")
     }
 }
@@ -110,6 +141,7 @@ function getCharacters() {
     let classInfo = BattleState.classes;
     for (let i = 0; i < classInfo.length; i++) {
         let menu = [];
+        let menuBackend = [];
         let currentClass = classInfo[i];
         
         // There is definitely a better way to do this, but trying to figure
@@ -117,44 +149,58 @@ function getCharacters() {
         // TODO: Refactor if time
         if (currentClass.amplify) {
             menu.push("amplify");
+            menuBackend.push("Amp");
         }
         if (currentClass.barrier) {
             menu.push("barrier");
+            menuBackend.push("Brr");
         }
         if (currentClass.curse) {
             menu.push("curse");
+            menuBackend.push("Crs");
         }
         if (currentClass.dampen) {
             menu.push("dampen");
+            menuBackend.push("Damp");
         }
         if (currentClass.demoralize) {
             menu.push("demoralize");
+            menuBackend.push("Demor");
         }
         if (currentClass.heal) {
             menu.push("heal");
+            menuBackend.push("Hl");
         }
         if (currentClass.intimidate) {
             menu.push("intimidate");
+            menuBackend.push("Intim");
         }
         if (currentClass.invigorate) {
             menu.push("invigorate");
+            menuBackend.push("Invig");
         }
         if (currentClass.kiAttack) {
             menu.push("kiAttack");
+            menuBackend.push("KA");
         }
         if (currentClass.rally) {
             menu.push("rally");
+            menuBackend.push("Rly");
         }
         if (currentClass.shield) {
             menu.push("shield");
+            menuBackend.push("Shld");
         }
         if (currentClass.stamAttack) {
             menu.push("stamAttack");
+            menuBackend.push("SA");
         }
 
         CharacterMenus.set(`${classInfo[i].id}`, menu);
+        CharacterMenusBackend.set(`${classInfo[i].id}`, menuBackend);
     }
-    console.log(CharacterMenus);
+    // console.log(CharacterMenus);
+    // console.log(CharacterMenusBackend);
 }
 
 function getSpellCost(type, level) {
@@ -185,7 +231,7 @@ function getEnemyTargets(move, type, level) {
             const target = document.createElement("button");
             target.innerText = `${char.name}`;
             target.addEventListener("click", () => {
-                appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
+                // appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
                 action(move, level, target.innerText);
             });
             targetDiv.appendChild(target);
@@ -271,7 +317,7 @@ function getBasicAttack(move, type, costType) {
     const level1 = document.createElement("button");
     level1.innerText = `Level 1 (${cost1})`;
     level1.addEventListener("click", () => {
-        appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+        // appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
         action(move, 1, "A");
     });
     attackMenuDiv.appendChild(level1);
@@ -281,7 +327,7 @@ function getBasicAttack(move, type, costType) {
     const level2 = document.createElement("button");
     level2.innerText = `Level 2 (${cost2})`;
     level2.addEventListener("click", () => {
-        appendToCombatLog(`DEBUG: Send level 2 ${type} ${move}`);
+        // appendToCombatLog(`DEBUG: Send level 2 ${type} ${move}`);
         action(move, 2, "A");
     });
     attackMenuDiv.appendChild(level2);
@@ -388,10 +434,16 @@ function sendEnemyAttack() {
 }
 
 function getMenu() {
-    appendToCombatLog(`DEBUG: Printing out ${CurrentAttacker.name} menu`);
-
+    // appendToCombatLog(`DEBUG: Printing out ${CurrentAttacker.name} menu`);
     const mainMenu = document.querySelector(".main-menu");
     mainMenu.innerHTML = "";
+    const subMenu = document.querySelector(".sub-menu");
+    subMenu.innerHTML = "";
+    const attackMenu = document.querySelector(".attack-menu");
+    attackMenu.innerHTML = "";
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
+
     let moves = CharacterMenus.get(CurrentAttacker.name);
 
     moves.forEach(move => {
@@ -437,7 +489,8 @@ function getItemEnemyTargets(move) {
             const target = document.createElement("button");
             target.innerText = `${char.name}`;
             target.addEventListener("click", () => {
-                appendToCombatLog(`DEBUG: Send ${move} to ${char.name}`);
+                // appendToCombatLog(`DEBUG: Send ${move} to ${char.name}`);
+                action(move, null, char.name);
             });
             attackDiv.appendChild(target);
         }
@@ -455,7 +508,8 @@ function getItemFriendlyTargets(move) {
             const target = document.createElement("button");
             target.innerText = `${char.name}`;
             target.addEventListener("click", () => {
-                appendToCombatLog(`DEBUG: Send ${move} on ${char.name}`);
+                // appendToCombatLog(`DEBUG: Send ${move} on ${char.name}`);
+                action(move, null, char.name);
             });
             attackDiv.appendChild(target);
         }
@@ -590,7 +644,7 @@ async function loadEncounter(encounterName) {
 
             //get our response
             console.log("Fetch sucessful, returned JSON: ");
-            appendToCombatLog(`Encounter ${encounterName} loaded`);
+            // appendToCombatLog(`Encounter ${encounterName} loaded`);
             console.log(BattleState);
         }
         else {
@@ -611,10 +665,7 @@ async function loadEncounter(encounterName) {
         turnOrder : turnOrderTemp
     }
 
-    console.log("new battle state");
-    console.log(BattleState)
-
-    getCharacters();
+    getCharacters(); // Run at beginning
     displayBoard();
     getTurnOrder();
     getNextTurn();
@@ -623,13 +674,23 @@ async function loadEncounter(encounterName) {
 async function action(move, level, target) {
     let a = null;
 
-    if (move == "Ea") {
+    if (move == "Ea") { // Enemy attack
+        appendToCombatLog(`${CurrentAttacker.name} attacks`);
         const temp = ["Ea"];
-        a = temp.concat(CharacterMenus.get(CurrentAttacker.name));
-        console.log(a);
+        a = temp.concat(CharacterMenusBackend.get(CurrentAttacker.name));
+    } else if (level == null) { // Item use
+        appendToCombatLog(`${CurrentAttacker.name} uses ${move}`);
+        a = [move, target];
+    } else if (move == "Invig" || move == "Demor" || move == "Intim" || move == "Shld" 
+        || move == "Amp" || move == "Damp" || move == "Crs" || move == "Brr") {
+        appendToCombatLog(`${CurrentAttacker.name} attacks`);
+        a = [move, target];
     } else {
+        appendToCombatLog(`${CurrentAttacker.name} attacks`);
         a = [move, level.toString(), target];
     }
+
+    console.log(a);
 
     // action : ["SA","3","Rat"],
 
@@ -665,10 +726,15 @@ async function action(move, level, target) {
     catch (error) {
         console.error("ERROR! ", error);
     }
+
+    updateCombatLog();
+    displayBoard(); // TODO: Create update board to give delays and such
+    getTurnOrder();
+    getNextTurn();
 }
 
 const testButton = document.querySelector("#test");
 testButton.addEventListener("click", () => {
-    appendToCombatLog(`DEBUG: Attempting to send JSON`);
+    // appendToCombatLog(`DEBUG: Attempting to send JSON`);
     action("Ea", null, null);
 });
