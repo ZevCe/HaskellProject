@@ -151,7 +151,7 @@ performAction ("Crs":targetName:_) chars = statusTarget [" ki ", " curse", targe
 --barrier (takes half damage from next ki attack)
 performAction ("Brr":targetName:_) chars = statusTarget [" ki ", " barrier", targetName] chars friendTeam modifyKi
 
---determine enemies move, will impliment once we have more front end
+--determine enemy action
 performAction ("Ea":moves) chars =
     case moveType of
         "KA" -> attackTarget [" ki ", levelType, targetEnemy] chars friendTeam modifyKi maxKi ("amplify", "dampen") ("curse", "barrier")
