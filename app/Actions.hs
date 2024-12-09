@@ -163,6 +163,8 @@ performAction ("Ea":moves) chars =
         "Damp" -> statusTarget [" ki ", " dampen", targetEnemy] chars friendTeam modifyKi 
         "Crs" -> statusTarget [" ki ", " curse", targetEnemy] chars friendTeam modifyKi 
         "Brr" -> statusTarget [" ki ", " barrier", targetAlly] chars enemyTeam modifyKi 
+        "Hl" -> restoreTarget [" ki ", levelType, targetAlly] chars enemyTeam modifyKi maxKi ki
+        "Rly" -> restoreTarget [" stamina ", levelType, targetAlly] chars enemyTeam modifyStamina maxStamina stamina
         _ -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
     where
         seed = mkStdGen ((length ((friendTeam chars))-1) * (length ((friendTeam chars))) + (length (enemyTeam chars)) * 2)
