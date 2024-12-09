@@ -120,7 +120,11 @@ function setStatusDiv(character) {
 }
 
 function createStatusString(name, statuses) {
-    // 
+    returnString = "";
+    
+    statuses.forEach(status => {
+        
+    });
     return "Not 0";
 }
 
