@@ -1,9 +1,10 @@
 module Test where
-{-
 import Character
 import Actions
-import Item
+import Encounter
 import Test.HUnit
+{-
+
 
 
 testActions :: Test
@@ -34,19 +35,37 @@ testActions = TestCase $ do
         print $ kiSingleAttack p2 p1 3
         print "p1 stamina attacking [p2, p3, p4, p5] at level 1"
         print $ staminaGroupAttack p1 [p2, p3, p4, p5] 1
+-}
 
 testHealthPotion :: Test
 testHealthPotion = TestCase $ do
-    let p1 = Character 80 100 50 50 20 []
-        p2 = makeCharacter 100 50 20
-        p3 = Character 90 100 50 50 20 []
-        p4 = makeCharacter 100 50 20
-        items = ItemList 2 2 2 2 2 2
-    print $ useHealthPotion p1 items
-    print $ useHealthPotion p3 items
-    assertEqual "Full Health Potion Test" p1 p2
-    assertEqual "Overflow Health Potion Test" p3 p4
+    let (userSkills, user) = getWarrior "User"
+        (_, target) = getWarrior "Target"
+        _ = performAction ["SA","1",(name target)] [user, target]
+        _ = performAction ["SA","1",(name target)] [user, target]
+        _ = performAction ["HeP",(name user)] [user, target]
+        _ = performAction ["HeP",(name target)] [target, user]
+        _ = performAction ["HeP",(name target)] [target, user]
+    assertEqual "Post Health Pot" (stamina target) 80
+    assertEqual "Post Health Pot Overflow" (stamina user) 100
 
+testManaPotion :: Test
+testManaPotion = TestCase $ do
+    let (userSkills, user) = getMage "User"
+    let (_, target) = getMage "Target"
+    let returnVal = performAction ["KA","1",(name target)] [user, target]
+    let returnVal = performAction ["HeP",(name target)] [user, target]
+    assertEqual "Test Health Potion" (stamina target) 50
+
+testStaminaAttack :: Test
+testStaminaAttack = TestCase $ do
+    let (userSkills, user) = getWarrior "User"
+    let (_, target) = getWarrior "Target"
+    let returnVal = performAction ["SA","1",(name target)] [user, target]
+    assertEqual "User Post SA Lv 1" (stamina user) 90
+    assertEqual "Target Post SA Lv 1" (stamina target) 80
+
+{-
 testManaPotion :: Test
 testManaPotion = TestCase $ do
     let p1 = Character 100 100 30 50 20 []

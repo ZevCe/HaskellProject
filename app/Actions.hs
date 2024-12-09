@@ -129,14 +129,20 @@ performAction ("Rly":level:targetName:_) chars = restoreTarget [" stamina ", lev
 
 --invigorate (target deals double damage on next stamina attack)
 performAction ("Invig":targetName:_) chars = statusTarget [" stamina ", " invigorate", targetName] chars friendTeam modifyStamina
+performAction ("Invig":targetName:_) chars = statusTarget [" stamina ", "invigorate", targetName] chars friendTeam modifyStamina
 
 --demoralize (deals half damage on next stamina attack)
+<<<<<<< Updated upstream
 performAction ("Demor":targetName:_) chars = statusTarget [" stamina ", " demoralize", targetName] chars enemyTeam modifyStamina
+=======
+performAction ("Demor":targetName:_) chars = statusTarget [" stamina ", "demoralize", targetName] chars enemyTeam modifyStamina 
+>>>>>>> Stashed changes
 
 --intimidate (takes double damage from next stamina attack)
-performAction ("Intim":targetName:_) chars = statusTarget [" stamina ", " intimidate", targetName] chars enemyTeam modifyStamina
+performAction ("Intim":targetName:_) chars = statusTarget [" stamina ", "intimidate", targetName] chars enemyTeam modifyStamina
 
 --shield (takes half damage from next stamina attack)
+<<<<<<< Updated upstream
 performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", " shield", targetName] chars friendTeam modifyStamina
 
 --amplify (deals double damage on next ki attack)
@@ -150,11 +156,27 @@ performAction ("Crs":targetName:_) chars = statusTarget [" ki ", " curse", targe
 
 --barrier (takes half damage from next ki attack)
 performAction ("Brr":targetName:_) chars = statusTarget [" ki ", " barrier", targetName] chars friendTeam modifyKi
+=======
+performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", "shield", targetName] chars friendTeam modifyStamina 
+
+--amplify (deals double damage on next ki attack)
+performAction ("Amp":targetName:_) chars = statusTarget [" ki ", "amplify", targetName] chars friendTeam modifyKi 
+
+--dampen (deals half damage on next ki attack)
+performAction ("Damp":targetName:_) chars = statusTarget [" ki ", "dampen", targetName] chars enemyTeam modifyKi 
+
+--curse (takes double damage from next ki attack)
+performAction ("Crs":targetName:_) chars = statusTarget [" ki ", "curse", targetName] chars enemyTeam modifyKi 
+
+--barrier (takes half damage from next ki attack)
+performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targetName] chars friendTeam modifyKi 
+>>>>>>> Stashed changes
 
 --determine enemy action
 performAction ("Ea":moves) chars =
     case moveType of
         "KA" -> attackTarget [" ki ", levelType, targetEnemy] chars friendTeam modifyKi maxKi ("amplify", "dampen") ("curse", "barrier")
+<<<<<<< Updated upstream
         "Invig" -> statusTarget [" stamina ", " invigorate", targetAlly] chars enemyTeam modifyStamina
         "Demor" -> statusTarget [" stamina ", " demoralize", targetEnemy] chars friendTeam modifyStamina
         "Intim" -> statusTarget [" stamina ", " intimidate", targetEnemy] chars friendTeam modifyStamina
@@ -186,6 +208,54 @@ performAction ("Ea":moves) chars =
           | otherwise = show levelIndex
         targetEnemy = name (friendTeam chars !! enemyIndex)
         targetAlly = name (enemyTeam chars !! allyIndex)
+=======
+        "Invig" -> statusTarget [" stamina ", "invigorate", targetAlly] chars enemyTeam modifyStamina
+        "Demor" -> statusTarget [" stamina ", "demoralize", targetEnemy] chars friendTeam modifyStamina 
+        "Intim" -> statusTarget [" stamina ", "intimidate", targetEnemy] chars friendTeam modifyStamina
+        "Shld" -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina 
+        "Amp" -> statusTarget [" ki ", "amplify", targetAlly] chars enemyTeam modifyKi 
+        "Damp" -> statusTarget [" ki ", "dampen", targetEnemy] chars friendTeam modifyKi 
+        "Crs" -> statusTarget [" ki ", "curse", targetEnemy] chars friendTeam modifyKi 
+        "Brr" -> statusTarget [" ki ", "barrier", targetAlly] chars enemyTeam modifyKi 
+        "Hl" -> restoreTarget [" ki ", levelType, targetAlly] chars enemyTeam modifyKi maxKi ki
+        "Rly" -> restoreTarget [" stamina ", levelType, targetAlly] chars enemyTeam modifyStamina maxStamina stamina
+        "SA" -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
+        _ -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina 
+    where
+        userStamina = stamina (chars !! 0)
+        userKi = ki (chars !! 0)
+        seed = mkStdGen (((length (enemyTeam chars)) * 2) * ((length (statuses (chars !! 0))) + (stamina (chars !! 0)) - ((ki (chars !! 0)))))
+        (enemyIndex, afterEnemyGen) = randomInt (0, (length (friendTeam chars))-1) seed
+        (allyIndex, afterAllyGen) = randomInt (0, (length (enemyTeam chars))-1) afterEnemyGen
+        (moveIndex, afterMoveGen) = randomInt (0, (length moves)-1) afterAllyGen
+        (levelIndex, afterLevelGen) = randomInt (0, 3) afterMoveGen
+        moveType = moves !! moveIndex
+        levelType = 
+            if moveType == "KA" then
+                if levelIndex == 3 && userKi < 41 then
+                    "0"
+                else if levelIndex == 2 && userKi < 26 then
+                    "0"
+                else if levelIndex == 1 && userKi < 11 then
+                    "0"
+                else 
+                    show levelIndex
+            else if moveType == "SA" then
+                if levelIndex == 3 && userStamina < 41 then
+                    "0"
+                else if levelIndex == 2 && userStamina < 26 then
+                    "0"
+                else if levelIndex == 1 && userStamina < 11 then
+                    "0"
+                else 
+                    show levelIndex
+            else if (moveType == "Hl" || moveType == "Rly") && levelIndex == 0 then
+                "1"
+            else 
+                show levelIndex
+        targetEnemy = (name ((friendTeam chars) !! enemyIndex))
+        targetAlly = (name ((enemyTeam chars) !! allyIndex))
+>>>>>>> Stashed changes
 
 performAction _ _ = undefined
 
