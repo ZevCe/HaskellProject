@@ -155,14 +155,14 @@ performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targ
 performAction ("Ea":moves) chars = 
     case moveType of
         "KA" -> attackTarget [" ki ", levelType, targetEnemy] chars friendTeam modifyKi maxKi ("amplify", "dampen") ("curse", "barrier")
-        "Invig" -> statusTarget [" stamina ", "invigorate", targetAlly] chars enemyTeam modifyStamina
-        "Demor" -> statusTarget [" stamina ", "demoralize", targetEnemy] chars friendTeam modifyStamina 
-        "Intim" -> statusTarget [" stamina ", "intimidate", targetEnemy] chars friendTeam modifyStamina
-        "Shld" -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina 
-        "Amp" -> statusTarget [" ki ", "amplify", targetAlly] chars enemyTeam modifyKi 
-        "Damp" -> statusTarget [" ki ", "dampen", targetEnemy] chars friendTeam modifyKi 
-        "Crs" -> statusTarget [" ki ", "curse", targetEnemy] chars friendTeam modifyKi 
-        "Brr" -> statusTarget [" ki ", "barrier", targetAlly] chars enemyTeam modifyKi 
+        "Invig" -> statusTarget [" stamina ", " invigorate", targetAlly] chars enemyTeam modifyStamina
+        "Demor" -> statusTarget [" stamina ", " demoralize", targetEnemy] chars friendTeam modifyStamina 
+        "Intim" -> statusTarget [" stamina ", " intimidate", targetEnemy] chars friendTeam modifyStamina
+        "Shld" -> statusTarget [" stamina ", " shield", targetAlly] chars enemyTeam modifyStamina 
+        "Amp" -> statusTarget [" ki ", " amplify", targetAlly] chars enemyTeam modifyKi 
+        "Damp" -> statusTarget [" ki ", " dampen", targetEnemy] chars friendTeam modifyKi 
+        "Crs" -> statusTarget [" ki ", " curse", targetEnemy] chars friendTeam modifyKi 
+        "Brr" -> statusTarget [" ki ", " barrier", targetAlly] chars enemyTeam modifyKi 
         _ -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
     where
         seed = mkStdGen 17
