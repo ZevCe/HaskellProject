@@ -152,12 +152,28 @@ performAction ("Crs":targetName:_) chars = statusTarget [" ki ", "curse", target
 performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targetName] chars friendTeam modifyKi 
 
 --determine enemies move, will impliment once we have more front end
-performAction ("Ea":_) char = attackTarget [" stamina ", "1", (name ((friendTeam char) !! targetIndex))] char friendTeam modifyStamina maxStamina userStatuses targetStatuses
+performAction ("Ea":moves) chars = 
+    case moveType of
+        "KA" -> attackTarget [" ki ", levelType, targetEnemy] chars friendTeam modifyKi maxKi ("amplify", "dampen") ("curse", "barrier")
+        "Invig" -> statusTarget [" stamina ", "invigorate", targetAlly] chars enemyTeam modifyStamina
+        "Demor" -> statusTarget [" stamina ", "demoralize", targetEnemy] chars friendTeam modifyStamina 
+        "Intim" -> statusTarget [" stamina ", "intimidate", targetEnemy] chars friendTeam modifyStamina
+        "Shld" -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina 
+        "Amp" -> statusTarget [" ki ", "amplify", targetAlly] chars enemyTeam modifyKi 
+        "Damp" -> statusTarget [" ki ", "dampen", targetEnemy] chars friendTeam modifyKi 
+        "Crs" -> statusTarget [" ki ", "curse", targetEnemy] chars friendTeam modifyKi 
+        "Brr" -> statusTarget [" ki ", "barrier", targetAlly] chars enemyTeam modifyKi 
+        _ -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
     where
-        userStatuses = ("invigorate", "demoralize")
-        targetStatuses = ("intimidate","shield")
         seed = mkStdGen 17
-        (targetIndex, afterTargetGen) = randomInt (1, length (friendTeam char)) seed
+        (enemyIndex, afterEnemyGen) = randomInt (1, length (friendTeam chars)) seed
+        (allyIndex, afterAllyGen) = randomInt (1, length (enemyTeam chars)) afterEnemyGen
+        (moveIndex, afterMoveGen) = randomInt (1, length moves) afterAllyGen
+        (levelIndex, afterLevelGen) = randomInt (1, 3) afterMoveGen
+        moveType = moves !! moveIndex
+        levelType = show levelIndex
+        targetEnemy = (name ((friendTeam chars) !! enemyIndex))
+        targetAlly = (name ((enemyTeam chars) !! allyIndex))
 
 performAction _ _ = undefined
 
