@@ -102,6 +102,7 @@ function getNextTurn() {
         getMenu();
     } else {
         appendToCombatLog("DEBUG: Enemy");
+        action("Ea")
     }
 }
 
@@ -153,10 +154,10 @@ function getCharacters() {
 
         CharacterMenus.set(`${classInfo[i].id}`, menu);
     }
-    // console.log(CharacterMenus);
+    console.log(CharacterMenus);
 }
 
-function getSpellCost(move, type, level) {
+function getSpellCost(type, level) {
     if (type == "single") {
         return Math.abs(Math.min((5 + (-15) * level), 0));
     } else {
@@ -185,6 +186,7 @@ function getEnemyTargets(move, type, level) {
             target.innerText = `${char.name}`;
             target.addEventListener("click", () => {
                 appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
+                action(move, level, target.innerText);
             });
             targetDiv.appendChild(target);
         }
@@ -192,9 +194,9 @@ function getEnemyTargets(move, type, level) {
 }
 
 function getBasicAttack(move, type, costType) {
-    let cost1 = getSpellCost(move, type, 1);
-    let cost2 = getSpellCost(move, type, 2);
-    let cost3 = getSpellCost(move, type, 3);
+    let cost1 = getSpellCost(type, 1);
+    let cost2 = getSpellCost(type, 2);
+    let cost3 = getSpellCost(type, 3);
     const attackMenuDiv = document.querySelector(".attack-menu");
     attackMenuDiv.innerHTML = "";
 
@@ -270,6 +272,7 @@ function getBasicAttack(move, type, costType) {
     level1.innerText = `Level 1 (${cost1})`;
     level1.addEventListener("click", () => {
         appendToCombatLog(`DEBUG: Send level 1 ${type} ${move}`);
+        action(move, 1, "A");
     });
     attackMenuDiv.appendChild(level1);
 
@@ -279,6 +282,7 @@ function getBasicAttack(move, type, costType) {
     level2.innerText = `Level 2 (${cost2})`;
     level2.addEventListener("click", () => {
         appendToCombatLog(`DEBUG: Send level 2 ${type} ${move}`);
+        action(move, 2, "A");
     });
     attackMenuDiv.appendChild(level2);
 }
@@ -377,6 +381,10 @@ function getSingleOrGroup(move) {
         getSpells(move, "group");
     });
     subMenu.appendChild(group);
+}
+
+function sendEnemyAttack() {
+    
 }
 
 function getMenu() {
@@ -610,14 +618,23 @@ async function loadEncounter(encounterName) {
     displayBoard();
     getTurnOrder();
     getNextTurn();
-    // attack("SA", "3", "Rat");
 }
 
 async function action(move, level, target) {
-    const a = [move, level, target];
+    let a = null;
+
+    if (move == "Ea") {
+        const temp = ["Ea"];
+        a = temp.concat(CharacterMenus.get(CurrentAttacker.name));
+        console.log(a);
+    } else {
+        a = [move, level.toString(), target];
+    }
+
+    // action : ["SA","3","Rat"],
 
     let request = {
-        action : ["SA","3","Rat"],
+        action : a,
         turnOrder : (BattleState.turnOrder)
     }
 
@@ -653,5 +670,5 @@ async function action(move, level, target) {
 const testButton = document.querySelector("#test");
 testButton.addEventListener("click", () => {
     appendToCombatLog(`DEBUG: Attempting to send JSON`);
-    action("Test", "Test", "Test");
+    action("Ea", null, null);
 });
