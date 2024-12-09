@@ -128,16 +128,16 @@ performAction ("Hl":level:targetName:_) chars = restoreTarget [" ki ", level, ta
 performAction ("Rly":level:targetName:_) chars = restoreTarget [" stamina ", level, targetName] chars friendTeam modifyStamina maxStamina stamina
 
 --invigorate (target deals double damage on next stamina attack)
-performAction ("Invig":targetName:_) chars = statusTarget [" stamina ", "invigorate", targetName] chars friendTeam modifyStamina
+performAction ("Invig":targetName:_) chars = statusTarget [" stamina ", " invigorate", targetName] chars friendTeam modifyStamina
 
 --demoralize (deals half damage on next stamina attack)
-performAction ("Demor":targetName:_) chars = statusTarget [" stamina ", "demoralize", targetName] chars enemyTeam modifyStamina 
+performAction ("Demor":targetName:_) chars = statusTarget [" stamina ", " demoralize", targetName] chars enemyTeam modifyStamina 
 
 --intimidate (takes double damage from next stamina attack)
-performAction ("Intim":targetName:_) chars = statusTarget [" stamina ", "intimidate", targetName] chars enemyTeam modifyStamina
+performAction ("Intim":targetName:_) chars = statusTarget [" stamina ", " intimidate", targetName] chars enemyTeam modifyStamina
 
 --shield (takes half damage from next stamina attack)
-performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", "shield", targetName] chars friendTeam modifyStamina 
+performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", " shield", targetName] chars friendTeam modifyStamina 
 
 --amplify (deals double damage on next ki attack)
 performAction ("Amp":targetName:_) chars = statusTarget [" ki ", " amplify", targetName] chars friendTeam modifyKi 
@@ -165,15 +165,38 @@ performAction ("Ea":moves) chars =
         "Brr" -> statusTarget [" ki ", " barrier", targetAlly] chars enemyTeam modifyKi 
         "Hl" -> restoreTarget [" ki ", levelType, targetAlly] chars enemyTeam modifyKi maxKi ki
         "Rly" -> restoreTarget [" stamina ", levelType, targetAlly] chars enemyTeam modifyStamina maxStamina stamina
-        _ -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
+        "SA" -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
+        _ -> statusTarget [" stamina ", " shield", targetAlly] chars enemyTeam modifyStamina 
     where
+        userStamina = stamina (chars !! 0)
+        userKi = ki (chars !! 0)
         seed = mkStdGen ((length ((friendTeam chars))-1) * (length ((friendTeam chars))) + (length (enemyTeam chars)) * 2)
         (enemyIndex, afterEnemyGen) = randomInt (0, (length (friendTeam chars))-1) seed
         (allyIndex, afterAllyGen) = randomInt (0, (length (enemyTeam chars))-1) afterEnemyGen
         (moveIndex, afterMoveGen) = randomInt (0, (length moves)-1) afterAllyGen
         (levelIndex, afterLevelGen) = randomInt (0, 3) afterMoveGen
         moveType = moves !! moveIndex
-        levelType = show levelIndex
+        levelType = 
+            if moveType == "KA" then
+                if levelIndex == 3 && userKi < 41 then
+                    "0"
+                else if levelIndex == 2 && userKi < 26 then
+                    "0"
+                else if levelIndex == 1 && userKi < 11 then
+                    "0"
+                else 
+                    show levelIndex
+            else if moveType == "SA" then
+                if levelIndex == 3 && userStamina < 41 then
+                    "0"
+                else if levelIndex == 2 && userStamina < 26 then
+                    "0"
+                else if levelIndex == 1 && userStamina < 11 then
+                    "0"
+                else 
+                    show levelIndex
+            else 
+                show levelIndex
         targetEnemy = (name ((friendTeam chars) !! enemyIndex))
         targetAlly = (name ((enemyTeam chars) !! allyIndex))
 
