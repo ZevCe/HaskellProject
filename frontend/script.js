@@ -72,7 +72,12 @@ function createStatBlock(character = null) {
     // Portrait
     const portraitDiv = document.createElement("div");
     portraitDiv.classList.add("portrait");
-    const portraitSource = "images/temp.png";
+    let portraitSource = null;
+    if (character.team == "Friend") {
+        portraitSource = "images/temp-friend.png";
+    } else {
+        portraitSource = "images/temp.png";
+    }
     portraitDiv.innerHTML = 
     `<img src=${portraitSource}></img>`;
 
@@ -83,7 +88,8 @@ function createStatBlock(character = null) {
     `<p class="name">${character.name}</p>
      <p class="stamina">${character.stamina} / ${character.maxStamina}</p>
      <p class="ki">${character.ki} / ${character.maxKi}</p>
-     <p class="speed">${character.speed}</p>`;
+     <p class="speed">${character.speed}</p>
+     <p class="status">Statuses go here</p>`;
 
     // Combining div
     characterDiv.appendChild(portraitDiv);
@@ -96,6 +102,19 @@ function createStatBlock(character = null) {
     } else {
         const enemyDiv = document.querySelector(".enemy-display");
         enemyDiv.appendChild(characterDiv);        
+    }
+
+    setStatusDiv(character);
+}
+
+function setStatusDiv(character) {
+    const statuses = document.querySelector(`#${character.name} .stat-block .status`);
+    // // Statues: Red debuff, green buff
+    // console.log(statuses);
+    if (character.statuses.length == 0) {
+        statuses.innerText = "0";
+    } else {
+        statuses.innerText = "Not 0";
     }
 }
 
@@ -114,7 +133,22 @@ function displayBoard() {
 }
 
 function endGame() {
-    return;
+    const mainMenu = document.querySelector(".main-menu");
+    mainMenu.innerHTML = "";
+    const subMenu = document.querySelector(".sub-menu");
+    subMenu.innerHTML = "";
+    const attackMenu = document.querySelector(".attack-menu");
+    attackMenu.innerHTML = "";
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
+
+    if (Enemies.length == 0) {
+        const enemyDiv = document.querySelector(".enemy-display");
+        enemyDiv.innerHTML = "<p>You Win!</p>";
+    } else {
+        const friendDiv = document.querySelector(".friend-display");
+        friendDiv.innerHTML = "<p>You lose!</p>";
+    }
 }
 
 function getNextTurn() {
@@ -135,7 +169,7 @@ function getNextTurn() {
         getMenu();
     } else {
         // appendToCombatLog("DEBUG: Enemy");
-        action("Ea")
+        action("Ea", null, null);
     }
 }
 
@@ -224,6 +258,23 @@ function isValidAttack(cost, costType) {
     return false;
 }
 
+function getFriendlyTargets(move, type, level) {
+    const targetDiv = document.querySelector(".target-menu");
+    targetDiv.innerHTML = "";
+
+    BattleState.turnOrder.forEach(char => {
+        if (char.team == "Friend") {
+            const target = document.createElement("button");
+            target.innerText = `${char.name}`;
+            target.addEventListener("click", () => {
+                // appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
+                action(move, level, target.innerText);
+            });
+            targetDiv.appendChild(target);
+        }
+    });
+}
+
 function getEnemyTargets(move, type, level) {
     const targetDiv = document.querySelector(".target-menu");
     targetDiv.innerHTML = "";
@@ -279,7 +330,11 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level1.style.backgroundColor = "green";
-            getEnemyTargets(move, type, 1);
+            if (move == "Invig" || move == "Shld" || move == "Damp" || move == "Brr") {
+                getFriendlyTargets(move, type, 1);
+            } else {
+                getEnemyTargets(move, type, 1);
+            }
         });
         attackMenuDiv.appendChild(level1);
 
@@ -293,7 +348,11 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level2.style.backgroundColor = "green";
-            getEnemyTargets(move, type, 2);
+            if (move == "Invig" || move == "Shld" || move == "Damp" || move == "Brr") {
+                getFriendlyTargets(move, type, 2);
+            } else {
+                getEnemyTargets(move, type, 2);
+            }
         });
         attackMenuDiv.appendChild(level2);
 
@@ -307,7 +366,11 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level3.style.backgroundColor = "green";
-            getEnemyTargets(move, type, 3);
+            if (move == "Invig" || move == "Shld" || move == "Damp" || move == "Brr") {
+                getFriendlyTargets(move, type, 3);
+            } else {
+                getEnemyTargets(move, type, 3);
+            }
         });
         attackMenuDiv.appendChild(level3);
 

@@ -19,6 +19,9 @@ main = scotty 3000 $ do
 
     get "/images/temp.png" $ do
       file "./frontend/images/temp.png"
+      
+    get "/images/temp-friend.png" $ do
+      file "./frontend/images/temp-friend.png"  
 
     --get request for loading an encounter  
     get "/loadEncounter/:num" $ do
