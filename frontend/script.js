@@ -112,7 +112,7 @@ function setStatusDiv(character) {
     // Statues: Red debuff, green buff
     if (character.statuses.length == 0) {
         // Replace with "" after testing
-        statuses.innerText = "0";
+        statuses.innerText = "";
     } else {
         // Go through the list and add each buff/debuff
         statuses.innerText = createStatusString(character.name, character.statuses);
@@ -123,9 +123,40 @@ function createStatusString(name, statuses) {
     returnString = "";
     
     statuses.forEach(status => {
-        
+        switch (status.trim()) {
+            case "webTrap":
+                returnString += "W";
+                break;
+            case "hastePotion":
+                returnString += "H";
+                break;
+            case "invigorate":
+                returnString += "I";
+                break;
+            case "demoralize":
+                returnString += "D";
+                break;
+            case "intimidate":
+                returnString += "I";
+                break;
+            case "shield":
+                returnString += "S";
+                break;
+            case "amplify":
+                returnString += "A";
+                break;
+            case "dampen":
+                returnString += "D";
+                break;
+            case "curse":
+                returnString += "C";
+                break;
+            case "barrier":
+                returnString += "B";
+                break;
+        }
     });
-    return "Not 0";
+    return returnString;
 }
 
 function displayBoard() {
@@ -502,10 +533,6 @@ function getSingleOrGroup(move) {
         getSpells(move, "group");
     });
     subMenu.appendChild(group);
-}
-
-function sendEnemyAttack() {
-    
 }
 
 function getMenu() {
