@@ -215,8 +215,8 @@ function getNextTurn() {
         getMenu();
     } else {
         // appendToCombatLog("DEBUG: Enemy");
-        // action("Ea", null, null);
-        getMenu();
+        action("Ea", null, null);
+        // getMenu();
     }
 }
 
