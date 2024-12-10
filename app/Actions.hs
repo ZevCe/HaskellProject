@@ -131,74 +131,61 @@ performAction ("Rly":level:targetName:_) chars = restoreTarget [" stamina ", lev
 performAction ("Invig":targetName:_) chars = statusTarget [" stamina ", "invigorate", targetName] chars friendTeam modifyStamina
 
 --demoralize (deals half damage on next stamina attack)
-performAction ("Demor":targetName:_) chars = statusTarget [" stamina ", "demoralize", targetName] chars enemyTeam modifyStamina 
+performAction ("Demor":targetName:_) chars = statusTarget [" stamina ", "demoralize", targetName] chars enemyTeam modifyStamina
 
 --intimidate (takes double damage from next stamina attack)
 performAction ("Intim":targetName:_) chars = statusTarget [" stamina ", "intimidate", targetName] chars enemyTeam modifyStamina
 
 --shield (takes half damage from next stamina attack)
-performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", "shield", targetName] chars friendTeam modifyStamina 
+performAction ("Shld":targetName:_) chars = statusTarget [" stamina ", "shield", targetName] chars friendTeam modifyStamina
 
 --amplify (deals double damage on next ki attack)
-performAction ("Amp":targetName:_) chars = statusTarget [" ki ", "amplify", targetName] chars friendTeam modifyKi 
+performAction ("Amp":targetName:_) chars = statusTarget [" ki ", "amplify", targetName] chars friendTeam modifyKi
 
 --dampen (deals half damage on next ki attack)
-performAction ("Damp":targetName:_) chars = statusTarget [" ki ", "dampen", targetName] chars enemyTeam modifyKi 
+performAction ("Damp":targetName:_) chars = statusTarget [" ki ", "dampen", targetName] chars enemyTeam modifyKi
 
 --curse (takes double damage from next ki attack)
-performAction ("Crs":targetName:_) chars = statusTarget [" ki ", "curse", targetName] chars enemyTeam modifyKi 
+performAction ("Crs":targetName:_) chars = statusTarget [" ki ", "curse", targetName] chars enemyTeam modifyKi
 
 --barrier (takes half damage from next ki attack)
-performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targetName] chars friendTeam modifyKi 
+performAction ("Brr":targetName:_) chars = statusTarget [" ki ", "barrier", targetName] chars friendTeam modifyKi
 
 --determine enemy action
 performAction ("Ea":moves) chars =
     case moveType of
         "KA" -> attackTarget [" ki ", levelType, targetEnemy] chars friendTeam modifyKi maxKi ("amplify", "dampen") ("curse", "barrier")
         "Invig" -> statusTarget [" stamina ", "invigorate", targetAlly] chars enemyTeam modifyStamina
-        "Demor" -> statusTarget [" stamina ", "demoralize", targetEnemy] chars friendTeam modifyStamina 
+        "Demor" -> statusTarget [" stamina ", "demoralize", targetEnemy] chars friendTeam modifyStamina
         "Intim" -> statusTarget [" stamina ", "intimidate", targetEnemy] chars friendTeam modifyStamina
-        "Shld" -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina 
-        "Amp" -> statusTarget [" ki ", "amplify", targetAlly] chars enemyTeam modifyKi 
-        "Damp" -> statusTarget [" ki ", "dampen", targetEnemy] chars friendTeam modifyKi 
-        "Crs" -> statusTarget [" ki ", "curse", targetEnemy] chars friendTeam modifyKi 
-        "Brr" -> statusTarget [" ki ", "barrier", targetAlly] chars enemyTeam modifyKi 
+        "Shld" -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina
+        "Amp" -> statusTarget [" ki ", "amplify", targetAlly] chars enemyTeam modifyKi
+        "Damp" -> statusTarget [" ki ", "dampen", targetEnemy] chars friendTeam modifyKi
+        "Crs" -> statusTarget [" ki ", "curse", targetEnemy] chars friendTeam modifyKi
+        "Brr" -> statusTarget [" ki ", "barrier", targetAlly] chars enemyTeam modifyKi
         "Hl" -> restoreTarget [" ki ", levelType, targetAlly] chars enemyTeam modifyKi maxKi ki
         "Rly" -> restoreTarget [" stamina ", levelType, targetAlly] chars enemyTeam modifyStamina maxStamina stamina
         "SA" -> attackTarget [" stamina ", levelType, targetEnemy] chars friendTeam modifyStamina maxStamina ("invigorate", "demoralize") ("intimidate","shield")
-        _ -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina 
+        _ -> statusTarget [" stamina ", "shield", targetAlly] chars enemyTeam modifyStamina
     where
-        userStamina = stamina (chars !! 0)
-        userKi = ki (chars !! 0)
-        seed = mkStdGen (((length (enemyTeam chars)) * 2) * ((length (statuses (chars !! 0))) + (stamina (chars !! 0)) - ((ki (chars !! 0)))))
-        (enemyIndex, afterEnemyGen) = randomInt (0, (length (friendTeam chars))-1) seed
-        (allyIndex, afterAllyGen) = randomInt (0, (length (enemyTeam chars))-1) afterEnemyGen
-        (moveIndex, afterMoveGen) = randomInt (0, (length moves)-1) afterAllyGen
-        (levelIndex, afterLevelGen) = randomInt (0, 3) afterMoveGen
+        userStamina = stamina (head chars)
+        userKi = ki (head chars)
+        seed = mkStdGen ((length (enemyTeam chars) * 2) * (length (statuses (head chars)) + stamina (head chars) - ki (head chars)))
+        (enemyIndex, afterEnemyGen) = randomInt (0, length (friendTeam chars) - 1) seed
+        (allyIndex, afterAllyGen) = randomInt (0, length (enemyTeam chars) - 1) afterEnemyGen
+        (moveIndex, afterMoveGen) = randomInt (0, length moves - 1) afterAllyGen
+        (levelIndex, _) = randomInt (0, 3) afterMoveGen
         moveType = moves !! moveIndex
-        levelType = 
-            if moveType == "KA" then
-                if levelIndex == 3 && userKi < 41 then
-                    "0"
-                else if levelIndex == 2 && userKi < 26 then
-                    "0"
-                else if levelIndex == 1 && userKi < 11 then
-                    "0"
-                else 
-                    show levelIndex
-            else if moveType == "SA" then
-                if levelIndex == 3 && userStamina < 41 then
-                    "0"
-                else if levelIndex == 2 && userStamina < 26 then
-                    "0"
-                else if levelIndex == 1 && userStamina < 11 then
-                    "0"
-                else 
-                    show levelIndex
-            else 
-                show levelIndex
-        targetEnemy = (name ((friendTeam chars) !! enemyIndex))
-        targetAlly = (name ((enemyTeam chars) !! allyIndex))
+        levelType
+          | moveType == "KA" =
+            if ((levelIndex == 3 && userKi < 41) || (levelIndex == 2 && userKi < 26)) || (levelIndex == 1 && userKi < 11) then "0"
+            else show levelIndex
+          | moveType == "SA" =
+            if ((levelIndex == 3 && userStamina < 41) || (levelIndex == 2 && userStamina < 26)) || (levelIndex == 1 && userStamina < 11) then "0"
+            else show levelIndex
+          | otherwise = show levelIndex
+        targetEnemy = name (friendTeam chars !! enemyIndex)
+        targetAlly = name (enemyTeam chars !! allyIndex)
 
 performAction _ _ = undefined
 
@@ -325,7 +312,7 @@ statusTarget (costType:status:targetName:_) chars@(user:_) getTeam modifyStat = 
 
         modifyTarget t = (logEntry, newTarget)
             where
-                logEntry = [name t ++ status ++ " gained "]
+                logEntry = [name t ++ " " ++ status ++ " gained "]
                 newTarget = addStatus t status
 
 statusTarget _ _ _ _ = undefined
@@ -365,23 +352,3 @@ returnUpdatedChars modifiedUser targets modifyTarget chars = TurnPacket logResul
                 where
                     unaffectedChars = filter (`notElem` updatedChars) oldChars
                     aliveChars = filter (\c -> ki  c > 0 && stamina c > 0) (updatedChars ++ unaffectedChars)
-
--- enemyActions :: [Class] -> IO [Class]
--- enemyActions chars@(turnChar:_) = do
---     if stamAttack turnChar then return $ fixTurnOrder turnChar $ enemyAttack chars stamina staminaSingleAttack
---     else return $ fixTurnOrder turnChar $ enemyAttack chars ki kiSingleAttack
-
--- enemyActions _ = undefined
-
--- enemyAttack :: [Class] -> (Character -> Int) -> (Character -> Character -> Int -> (Character, Character)) -> [Class]
--- enemyAttack chars@(turnChar:_) stat attack = returnList 
---     where 
---         potentialTargets = friendTeam chars
---         bestTarget = minimumBy (\c1 c2 -> compare (stat (character c1)) (stat (character c2))) potentialTargets
---         outcome = attack (character turnChar) (character bestTarget) 0
---         returnList =
---             if turnChar == bestTarget
---                 then updateCharList chars [updateCharacter (updateCharacter turnChar (fst outcome)) (snd outcome)]
---             else updateCharList chars [updateCharacter turnChar (fst outcome), updateCharacter bestTarget (snd outcome)]
-
--- enemyAttack _ _ _ = undefined
