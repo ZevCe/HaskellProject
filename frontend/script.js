@@ -40,7 +40,7 @@ function updateCombatLog() {
 
 function getTeams() {
     turnOrder = BattleState.turnOrder;
-    console.log(turnOrder);
+    // console.log(turnOrder);
 
     Enemies = [];
     Friends = [];
@@ -53,8 +53,8 @@ function getTeams() {
         }
     });
 
-    console.log(Enemies);
-    console.log(Friends);
+    // console.log(Enemies);
+    // console.log(Friends);
 }
 
 function createStatBlock(character = null) {
@@ -210,7 +210,8 @@ function getNextTurn() {
         getMenu();
     } else {
         // appendToCombatLog("DEBUG: Enemy");
-        action("Ea", null, null);
+        // action("Ea", null, null);
+        getMenu();
     }
 }
 
@@ -794,7 +795,7 @@ function getTurnOrder() {
  * API CALLS *
  *************/
 async function loadEncounter(encounterName) {
-    console.log(`Attempting to load encounter ${encounterName}`);
+    // console.log(`Attempting to load encounter ${encounterName}`);
     // appendToCombatLog(`Loading ${encounterName}`);
     const url = `http://localhost:3000/loadEncounter/${encounterName}`;
 
@@ -807,6 +808,8 @@ async function loadEncounter(encounterName) {
             console.log("Fetch sucessful, returned JSON: ");
             // appendToCombatLog(`Encounter ${encounterName} loaded`);
             console.log(BattleState);
+            const cl = document.querySelector(".combat-log");
+            cl.innerHTML = "";
         }
         else {
             console.log("response.status error: " + response.status);
