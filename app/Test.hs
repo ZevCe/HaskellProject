@@ -125,56 +125,56 @@ testInvigorate = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Invig","Target"] [user, target]
-    assertEqual "Post Invig" (action first) ["God stamina -25","Targetinvigorate gained "]
+    assertEqual "Post Invig" (action first) ["God stamina -25","Target invigorate gained "]
 
 testShield :: Test
 testShield = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Shld","Target"] [user, target]
-    assertEqual "Post Shield" (action first) ["God stamina -25","Targetshield gained "]
+    assertEqual "Post Shield" (action first) ["God stamina -25","Target shield gained "]
 
 testAmp :: Test
 testAmp = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Amp","Target"] [user, target]
-    assertEqual "Post Amp" (action first) ["God ki -25","Targetamplify gained "]
+    assertEqual "Post Amp" (action first) ["God ki -25","Target amplify gained "]
 
 testBarrier :: Test
 testBarrier = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Brr","Target"] [user, target]
-    assertEqual "Post Barrier" (action first) ["God ki -25","Targetbarrier gained "]
+    assertEqual "Post Barrier" (action first) ["God ki -25","Target barrier gained "]
 
 testDemoralize :: Test
 testDemoralize = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Demor","Target"] [user, target]
-    assertEqual "Post Demoralize" (action first) ["God stamina -25","Targetdemoralize gained "]
+    assertEqual "Post Demoralize" (action first) ["God stamina -25","Target demoralize gained "]
 
 testDampen :: Test
 testDampen = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Damp","Target"] [user, target]
-    assertEqual "Post Dampen" (action first) ["God ki -25","Targetdampen gained "]
+    assertEqual "Post Dampen" (action first) ["God ki -25","Target dampen gained "]
 
 testIntimidate :: Test
 testIntimidate = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Intim","Target"] [user, target]
-    assertEqual "Post Intimidate" (action first) ["God stamina -25","Targetintimidate gained "]
+    assertEqual "Post Intimidate" (action first) ["God stamina -25","Target intimidate gained "]
 
 testCurse :: Test
 testCurse = TestCase $ do
     let (_, user) = getGod
         (_, target) = getWarrior "Target"
         first = performAction ["Crs","Target"] [user, target]
-    assertEqual "Post Curse" (action first) ["God ki -25","Targetcurse gained "]
+    assertEqual "Post Curse" (action first) ["God ki -25","Target curse gained "]
 
 testAttacks :: Test
 testAttacks = TestList
@@ -211,6 +211,27 @@ testBuffs = TestList
 testDebuffs :: Test
 testDebuffs = TestList
     [
+        TestLabel "Demoralize Test" testDemoralize,
+        TestLabel "Damp Test" testDampen,
+        TestLabel "Intimidate Test" testIntimidate,
+        TestLabel "Curse Test" testCurse
+    ]
+
+testAll :: Test
+testAll = TestList [
+        TestLabel "Stamina Attack Test" testStaminaAttack,
+        TestLabel "Ki Attack Test" testKiAttack,
+        TestLabel "Health Pot Test" testHealthPotion,
+        TestLabel "Mana Pot Test" testManaPotion,
+        TestLabel "Web Trap Test" testWebTrap,
+        TestLabel "Throwing Knives Test" testThrowingKnives,
+        TestLabel "Magical Seal Test" testMagicalSeal,
+        TestLabel "Heal Test" testHeal,
+        TestLabel "Rally Test" testRally,
+        TestLabel "Invig Test" testInvigorate,
+        TestLabel "Shield Test" testShield,
+        TestLabel "Amp Test" testAmp,
+        TestLabel "Barrier Test" testBarrier,
         TestLabel "Demoralize Test" testDemoralize,
         TestLabel "Damp Test" testDampen,
         TestLabel "Intimidate Test" testIntimidate,
