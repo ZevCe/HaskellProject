@@ -346,6 +346,8 @@ function getStatus(move, type, costType) {
     attackMenuDiv.innerHTML = "";
 
     if (type == "single") {
+        if (!isValidAttack(25, costType)) { return; }
+
         if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
             const targetDiv = document.querySelector(".attack-menu");
             targetDiv.innerHTML = "";
@@ -377,6 +379,7 @@ function getStatus(move, type, costType) {
         }
             
         } else {
+            if (!isValidAttack(60, costType)) { return; }
             const targetDiv = document.querySelector(".attack-menu");
             targetDiv.innerHTML = "";
         
@@ -540,7 +543,7 @@ function getBasicAttack(move, type, costType) {
         return;
     }
 
-    if (!isValidAttack(cost1, costType)) { return; }
+    if (!isValidAttack(30, costType)) { return; }
 
     const level1 = document.createElement("button");
     level1.innerText = `Level 1 (${cost1})`;
@@ -550,7 +553,7 @@ function getBasicAttack(move, type, costType) {
     });
     attackMenuDiv.appendChild(level1);
 
-    if (!isValidAttack(cost2, costType)) { return; }
+    if (!isValidAttack(60, costType)) { return; }
 
     const level2 = document.createElement("button");
     level2.innerText = `Level 2 (${cost2})`;
