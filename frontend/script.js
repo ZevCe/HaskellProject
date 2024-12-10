@@ -345,6 +345,7 @@ function getStatus(move, type, costType) {
             const targetDiv = document.querySelector(".attack-menu");
             targetDiv.innerHTML = "";
         
+        if (CurrentAttacker.team == "Friend") {
             BattleState.turnOrder.forEach(char => {
                 if (char.team == "Friend") {
                     const target = document.createElement("button");
@@ -357,9 +358,6 @@ function getStatus(move, type, costType) {
                 }
             });
         } else {
-            const targetDiv = document.querySelector(".attack-menu");
-            targetDiv.innerHTML = "";
-        
             BattleState.turnOrder.forEach(char => {
                 if (char.team == "Enemy") {
                     const target = document.createElement("button");
@@ -371,6 +369,37 @@ function getStatus(move, type, costType) {
                     targetDiv.appendChild(target);
                 }
             });
+        }
+            
+        } else {
+            const targetDiv = document.querySelector(".attack-menu");
+            targetDiv.innerHTML = "";
+        
+            if (CurrentAttacker.team == "Friend") {
+                BattleState.turnOrder.forEach(char => {
+                    if (char.team == "Enemy") {
+                        const target = document.createElement("button");
+                        target.innerText = `${char.name} (${costSingle})`;
+                        target.addEventListener("click", () => {
+                            // appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
+                            action(move, 0, char.name);
+                        });
+                        targetDiv.appendChild(target);
+                    }
+                });
+            } else {
+                BattleState.turnOrder.forEach(char => {
+                    if (char.team == "Friend") {
+                        const target = document.createElement("button");
+                        target.innerText = `${char.name} (${costSingle})`;
+                        target.addEventListener("click", () => {
+                            // appendToCombatLog(`DEBUG: Send level ${level} ${type} ${move} to ${char.name}`);
+                            action(move, 0, char.name);
+                        });
+                        targetDiv.appendChild(target);
+                    }
+                });
+            }
         }
 
         return;
@@ -416,7 +445,11 @@ function getBasicAttack(move, type, costType) {
                     button.style.backgroundColor = "rgb(212, 180, 180)";
                 });
                 level0.style.backgroundColor = "green";
-                getEnemyTargets(move, type, 0);
+                if (CurrentAttacker.team == "Friend") {
+                    getEnemyTargets(move, type, 0);
+                } else {
+                    getFriendlyTargets(move, type, 0);
+                }
             });
             attackMenuDiv.appendChild(level0);
         }
@@ -431,10 +464,18 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level1.style.backgroundColor = "green";
-            if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
-                getFriendlyTargets(move, type, 1);
+            if (CurrentAttacker.team == "Friend") {
+                if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
+                    getFriendlyTargets(move, type, 2);
+                } else {
+                    getEnemyTargets(move, type, 2);
+                }
             } else {
-                getEnemyTargets(move, type, 1);
+                if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
+                    getEnemyTargets(move, type, 2);
+                } else {
+                    getFriendlyTargets(move, type, 2);
+                }
             }
         });
         attackMenuDiv.appendChild(level1);
@@ -449,10 +490,18 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level2.style.backgroundColor = "green";
-            if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
-                getFriendlyTargets(move, type, 2);
+            if (CurrentAttacker.team == "Friend") {
+                if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
+                    getFriendlyTargets(move, type, 2);
+                } else {
+                    getEnemyTargets(move, type, 2);
+                }
             } else {
-                getEnemyTargets(move, type, 2);
+                if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
+                    getEnemyTargets(move, type, 2);
+                } else {
+                    getFriendlyTargets(move, type, 2);
+                }
             }
         });
         attackMenuDiv.appendChild(level2);
@@ -467,10 +516,18 @@ function getBasicAttack(move, type, costType) {
                 button.style.backgroundColor = "rgb(212, 180, 180)";
             });
             level3.style.backgroundColor = "green";
-            if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
-                getFriendlyTargets(move, type, 3);
+            if (CurrentAttacker.team == "Friend") {
+                if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
+                    getFriendlyTargets(move, type, 2);
+                } else {
+                    getEnemyTargets(move, type, 2);
+                }
             } else {
-                getEnemyTargets(move, type, 3);
+                if (move == "Invig" || move == "Shld" || move == "Hl" || move == "Brr") {
+                    getEnemyTargets(move, type, 2);
+                } else {
+                    getFriendlyTargets(move, type, 2);
+                }
             }
         });
         attackMenuDiv.appendChild(level3);

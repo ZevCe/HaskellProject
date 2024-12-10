@@ -129,11 +129,23 @@ button {
 
   .main-menu,
   .sub-menu,
-  .attack-menu {
+  .attack-menu,
+  .target-menu 
+  {
     display: flex;
     flex-direction: column;
+    overflow: scroll;
     height: 200px;
+    min-width: 135px;
+    max-width: 135px;
   }
+
+  .main-menu::-webkit-scrollbar,
+  .sub-menu::-webkit-scrollbar,
+  .attack-menu::-webkit-scrollbar,
+  .target-menu::-webkit-scrollbar {
+    display: none;
+}
 
   .menu button {
     padding: 5px;
