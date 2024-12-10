@@ -170,7 +170,7 @@ performAction ("Ea":moves) chars =
     where
         userStamina = stamina (chars !! 0)
         userKi = ki (chars !! 0)
-        seed = mkStdGen ((length ((friendTeam chars))-1) * (length ((friendTeam chars))) + (length (enemyTeam chars)) * 2)
+        seed = mkStdGen (((length (enemyTeam chars)) * 2) * ((length (statuses (chars !! 0))) + (stamina (chars !! 0)) - ((ki (chars !! 0)))))
         (enemyIndex, afterEnemyGen) = randomInt (0, (length (friendTeam chars))-1) seed
         (allyIndex, afterAllyGen) = randomInt (0, (length (enemyTeam chars))-1) afterEnemyGen
         (moveIndex, afterMoveGen) = randomInt (0, (length moves)-1) afterAllyGen
