@@ -234,7 +234,7 @@ attackTarget (atkType:levelString:targetName:_) chars@(user:_) getTeam modifySta
         --helper function for adding a used buff to the log
         logBuff :: ((String, String) -> String) -> (String, String) -> Character -> [String]
         logBuff select buffs char
-            | select buffs `elem` statuses char = [name char ++ fst buffs ++ " applied"]
+            | select buffs `elem` statuses char = [name char ++ " " ++ fst buffs ++ " applied"]
             | otherwise = []
 
         modifiedUser = (logEntries, newUser)

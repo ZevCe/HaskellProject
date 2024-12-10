@@ -161,7 +161,8 @@ button {
  **************/
 
  #turn-order {
-    border: 1px, solid, blue;
+    text-align: center;
+    background-color: gray;
     margin: 20px;
     width: 200px;
  }

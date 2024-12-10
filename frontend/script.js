@@ -24,6 +24,11 @@ function appendToCombatLog(toAppend) {
     const combatLogDiv = document.querySelector(".combat-log");
     const par = document.createElement("p");
     par.innerText = toAppend
+    if (CurrentAttacker.team == "Friend") {
+        par.style.color = "blue";
+    } else {
+        par.style.color = "#6E260E";
+    }
     combatLogDiv.insertBefore(par, combatLogDiv.firstChild);
 }
 
@@ -840,11 +845,15 @@ function getItems() {
 
 function getTurnOrder() {
     const turnOrderDiv = document.querySelector("#turn-order");
-    turnOrderDiv.innerHTML = `<p>Turn Order</p>`;
+    turnOrderDiv.innerHTML = `<p style="font-weight: bold">Turn Order</p>`;
 
     let turnOrder = "";
     BattleState.turnOrder.forEach(char => {
-        turnOrderDiv.innerHTML += `<p>${char.name}</p>`;
+        if (char.team == "Friend") {
+            turnOrderDiv.innerHTML += `<p style="color: blue">${char.name}</p>`;
+        } else {
+            turnOrderDiv.innerHTML += `<p style="color: #6E260E">${char.name}</p>`;
+        }
     });
 }
 
